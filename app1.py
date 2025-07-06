@@ -1,56 +1,46 @@
 import streamlit as st
 import numpy as np
-import tensorflow as tf
 from PIL import Image
+import tensorflow as tf
 
-# ===== Dice coefficient & loss =====
-def dice_coef(y_true, y_pred, smooth=1):
-    y_true_f = tf.keras.backend.flatten(y_true)
-    y_pred_f = tf.keras.backend.flatten(y_pred)
-    intersection = tf.keras.backend.sum(y_true_f * y_pred_f)
-    return (2. * intersection + smooth) / (
-        tf.keras.backend.sum(y_true_f) + tf.keras.backend.sum(y_pred_f) + smooth)
-
-def dice_loss(y_true, y_pred):
-    return 1 - dice_coef(y_true, y_pred)
-
-# ===== Image Preprocessing =====
+# ===== Image preprocessing =====
 def preprocess_image(uploaded_file, target_size=(128, 128)):
-    image = Image.open(uploaded_file).convert("L")  # Grayscale
+    image = Image.open(uploaded_file).convert("L")
     image = image.resize(target_size)
     img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=(0, -1))  # shape: (1, H, W, 1)
+    img_array = img_array.astype(np.float32)
+    img_array = np.expand_dims(img_array, axis=(0, -1))  # (1, H, W, 1)
     return img_array, image
 
-# ===== Prediction =====
-def predict(model, image_array):
-    prediction = model.predict(image_array)[0, :, :, 0]
+# ===== TFLite prediction =====
+def tflite_predict(interpreter, input_data):
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    interpreter.invoke()
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    # افترض أن الناتج هو (1, H, W, 1)
+    prediction = output_data[0, :, :, 0]
     prediction = (prediction > 0.5).astype(np.uint8) * 255
     return prediction
 
-# ===== Streamlit App =====
-st.set_page_config(page_title="Segmentation IRM - UNet", layout="centered")
-st.title("🧠 Application de Segmentation IRM - UNet")
+# ===== Streamlit app =====
+st.title("🧠 Segmentation IRM avec modèle TFLite")
 
-st.markdown("### 1️⃣ Téléversez le modèle UNet (`.h5` ou `.keras`)")
-model_file = st.file_uploader("📥 Modèle entraîné", type=["h5", "keras"])
+model_file = st.file_uploader("📥 Téléversez le modèle TFLite (.tflite)", type=["tflite"])
 
 if model_file is not None:
-    try:
-        model = tf.keras.models.load_model(model_file, compile=False)
-        model.compile(optimizer='adam', loss=dice_loss, metrics=[dice_coef])
-        st.success("✅ Modèle chargé avec succès.")
-    except Exception as e:
-        st.error(f"❌ Erreur lors du chargement du modèle: {e}")
-        st.stop()
+    # نقرأ الملف في الذاكرة
+    tflite_model = model_file.read()
+    interpreter = tf.lite.Interpreter(model_content=tflite_model)
+    interpreter.allocate_tensors()
+    st.success("✅ Modèle TFLite chargé.")
 
-    st.markdown("### 2️⃣ Téléversez une image IRM à segmenter")
-    image_file = st.file_uploader("📤 Image IRM (PNG ou JPG)", type=["png", "jpg", "jpeg"])
-
+    image_file = st.file_uploader("📤 Téléversez une image IRM (PNG/JPG)", type=["png", "jpg", "jpeg"])
     if image_file is not None:
         img_array, img_pil = preprocess_image(image_file)
-        st.image(img_pil, caption="🖼️ Image IRM originale", use_column_width=True)
+        st.image(img_pil, caption="Image originale", use_column_width=True)
 
-        st.markdown("### 3️⃣ Résultat de la segmentation")
-        prediction = predict(model, img_array)
-        st.image(prediction, caption="🧾 Masque segmenté", use_column_width=True, clamp=True)
+        pred_mask = tflite_predict(interpreter, img_array)
+        st.image(pred_mask, caption="Masque segmenté", use_column_width=True, clamp=True)
