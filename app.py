@@ -44,3 +44,38 @@ def preprocess_image(img: Image.Image):
     img_array = np.array(img) / 255.0
     img_array = img_array.reshape(1, IMG_SIZE[0], IMG_SIZE[1], 1)
     return img_array
+
+# -------- Début de l'app --------
+st.set_page_config(page_title="IRM Brain Segmentation", layout="centered")
+st.title("🧠 IRM Brain Segmentation avec U-Net")
+st.markdown("Ce projet utilise un modèle U-Net pour segmenter les IRMs cérébrales.")
+
+# -------- Télécharger et charger le modèle --------
+download_model()
+model = load_unet_model()
+
+# -------- Upload de l'image --------
+uploaded_file = st.file_uploader("📤 Choisissez une image IRM (.png)", type=["png", "jpg", "jpeg"])
+
+if uploaded_file is not None:
+    # Charger et afficher l'image
+    image = Image.open(uploaded_file)
+    st.image(image, caption="🖼️ Image chargée", use_column_width=True)
+
+    # Bouton de prédiction
+    if st.button("🔍 Segmenter"):
+        with st.spinner("⏳ Prédiction en cours..."):
+            input_img = preprocess_image(image)
+            prediction = model.predict(input_img)[0, :, :, 0]
+
+            # Seuillage simple pour obtenir un masque binaire
+            mask = (prediction > 0.5).astype(np.uint8) * 255
+            mask_img = Image.fromarray(mask)
+
+        # Affichage
+        st.subheader("🩻 Masque segmenté :")
+        st.image(mask_img, use_column_width=True)
+
+        # Option de téléchargement
+        st.download_button("📥 Télécharger le masque", data=mask_img.tobytes(),
+                           file_name="mask.png", mime="image/png")
