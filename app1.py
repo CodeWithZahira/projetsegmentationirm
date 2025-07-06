@@ -31,7 +31,6 @@ def load_tflite_model_from_url(url):
     interpreter.allocate_tensors()
     return interpreter
 
-https://drive.google.com/file/d/16sxehD5rCA9uVovFIsgqMQDiL_5fAT8u/view?usp=sharing
 MODEL_ID = "16sxehD5rCA9uVovFIsgqMQDiL_5fAT8u"
 MODEL_URL = f"https://drive.google.com/uc?export=download&id={MODEL_ID}"
 
