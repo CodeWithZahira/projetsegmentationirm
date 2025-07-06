@@ -1,68 +1,62 @@
-import os
 import streamlit as st
 import numpy as np
-from PIL import Image
 import tensorflow as tf
-from tensorflow.keras.models import load_model
-import tensorflow.keras.backend as K
+from PIL import Image
+import cv2
 import gdown
+import os
 
-# -------- Constants --------
-MODEL_DRIVE_ID = "1ti_-AtZzOHTVzHAHnQJyJuNzfu4TD7IB"
-MODEL_PATH = "unet_model_finetuned.h5"
-IMG_SIZE = (128, 128)
+MODEL_PATH = "unet_model.h5"
+FILE_ID = "1ti_-AtZzOHTVzHAHnQJyJuNzfu4TD7IB"
 
-# -------- Custom dice functions --------
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        st.info("📥 Téléchargement du modèle...")
+        gdown.download(id=FILE_ID, output=MODEL_PATH, quiet=False)
+
+@st.cache_resource
+def load_model():
+    download_model()
+    model = tf.keras.models.load_model(MODEL_PATH, custom_objects={'dice_loss': dice_loss, 'dice_coef': dice_coef})
+    return model
+
 def dice_coef(y_true, y_pred, smooth=1):
     y_true_f = tf.keras.backend.flatten(y_true)
     y_pred_f = tf.keras.backend.flatten(y_pred)
     intersection = tf.keras.backend.sum(y_true_f * y_pred_f)
-    return (2. * intersection + smooth) / (tf.keras.backend.sum(y_true_f) + tf.keras.backend.sum(y_pred_f) + smooth)
+    return (2. * intersection + smooth) / (
+        tf.keras.backend.sum(y_true_f) + tf.keras.backend.sum(y_pred_f) + smooth)
 
 def dice_loss(y_true, y_pred):
     return 1 - dice_coef(y_true, y_pred)
-# -------- Download model from Drive --------
-def download_model():
-    if not os.path.exists(MODEL_PATH):
-        with st.spinner("📥 Téléchargement du modèle depuis Google Drive..."):
-            gdown.download(id=MODEL_DRIVE_ID, output=MODEL_PATH, quiet=False)
-        st.success("✅ Modèle téléchargé avec succès!")
 
-# -------- Load U-Net model --------
-def load_unet_model():
-    model = load_model(MODEL_PATH, custom_objects={'dice_loss': dice_loss, 'dice_coef': dice_coef})
-    return model
+def preprocess_image(uploaded_file, target_size=(128, 128)):
+    image = Image.open(uploaded_file).convert("L")  # Grayscale
+    image = image.resize(target_size)
+    img_array = np.array(image) / 255.0
+    img_array = np.expand_dims(img_array, axis=(0, -1))  # (1, H, W, 1)
+    return img_array, image
 
-# -------- Preprocessing image --------
-def preprocess_image(img: Image.Image):
-    if img.mode != "L":
-        img = img.convert("L")  # Convertir en niveaux de gris
+def predict(model, image_array):
+    prediction = model.predict(image_array)[0, :, :, 0]
+    prediction = (prediction > 0.5).astype(np.uint8) * 255
+    return prediction
 
-    img = img.resize(IMG_SIZE)
-    img_array = np.array(img) / 255.0
-    img_array = img_array.reshape(1, IMG_SIZE[0], IMG_SIZE[1], 1)
-    return img_array
-st.title("Brain MRI Segmentation App")
-model = load_model(MODEL_PATH, custom_objects={'dice_loss': dice_loss, 'dice_coef': dice_coef})
+# Streamlit
+st.set_page_config(page_title="Segmentation IRM Cerveau", layout="centered")
+st.title("🧠 Application de Segmentation IRM - UNet")
 
-im_height = 256
-im_width = 256
+uploaded_file = st.file_uploader("📤 Téléversez une image IRM (format PNG ou JPG)", type=["png", "jpg", "jpeg"])
 
-file = st.file_uploader("Upload file", type=[
-                            "csv", "png", "jpg"], accept_multiple_files=True)
-if file:
-    for i in file:
-        st.header("Original Image:")
-        st.image(i)
-        content = i.getvalue()
-        image = np.asarray(bytearray(content), dtype="uint8")
-        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        img2 = cv2.resize(image, (im_height, im_width))
-        img3 = img2/255
-        img4 = img3[np.newaxis, :, :, :]
-        if st.button("Predict Output:"):
-            pred_img = model.predict(img4)
-            st.header("Predicted Image:")
-            st.image(pred_img)
-        else:
-            continue
+if uploaded_file is not None:
+    model = load_model()
+
+    st.subheader("📸 Image originale")
+    image_array, image_display = preprocess_image(uploaded_file)
+    st.image(image_display, caption="Image IRM", use_column_width=True)
+
+    st.subheader("🔍 Prédiction de la segmentation...")
+    mask = predict(model, image_array)
+
+    st.subheader("🧾 Masque segmenté")
+    st.image(mask, caption="Masque UNet", use_column_width=True, clamp=True)
