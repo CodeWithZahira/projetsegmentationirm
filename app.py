@@ -23,7 +23,7 @@ def download_model():
 
 # -------- Load U-Net model --------
 def load_unet_model():
-    model = load_model(MODEL_PATH, custom_objects={'dice_loss': dice_loss, 'dice_coef': dice_coef})
+    model = load_model(MODEL_PATH)
     return model
 # -------- Preprocessing image --------
 def preprocess_image(img: Image.Image):
