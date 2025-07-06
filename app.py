@@ -30,11 +30,9 @@ def download_model():
         st.success("✅ Modèle téléchargé avec succès!")
 
 # -------- Load U-Net model --------
-@st.cache_resource(show_spinner=True)
 def load_unet_model():
     model = load_model(MODEL_PATH, custom_objects={'dice_loss': dice_loss, 'dice_coef': dice_coef})
     return model
-
 # -------- Preprocessing image --------
 def preprocess_image(img: Image.Image):
     if img.mode != "L":
