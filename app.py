@@ -22,7 +22,7 @@ def download_model():
         st.success("✅ Modèle téléchargé avec succès!")
 
 # -------- Load U-Net model --------
-def load_unet_model():
+def load_unet_model_finetuned():
     model = load_model(MODEL_PATH)
     return model
 # -------- Preprocessing image --------
@@ -42,7 +42,7 @@ st.markdown("Ce projet utilise un modèle U-Net pour segmenter les IRMs cérébr
 
 # -------- Télécharger et charger le modèle --------
 download_model()
-model = load_unet_model()
+model = load_unet_model_finetuned()
 
 # -------- Upload de l'image --------
 uploaded_file = st.file_uploader("📤 Choisissez une image IRM (.png)", type=["png", "jpg", "jpeg"])
