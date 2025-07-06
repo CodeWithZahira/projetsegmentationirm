@@ -43,7 +43,11 @@ def display_prediction(image_pil, mask):
     st.image(buf)
 
 # ===== Streamlit app =====
-st.title("🧠 Segmentation IRM avec modèle TFLite")
+st.set_page_config(page_title="🧠 NeuroSeg - IRM Segmentation", page_icon="🧠", layout="wide")
+st.markdown("<h1 style='text-align: center; color: #4CAF50;'>🧠 NeuroSeg</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center;'>Segmentation automatique des IRM cérébrales avec Deep Learning</h4>", unsafe_allow_html=True)
+st.markdown("---")
+
 
 model_file = st.file_uploader("📥 Téléversez le modèle TFLite (.tflite)", type=["tflite"])
 
