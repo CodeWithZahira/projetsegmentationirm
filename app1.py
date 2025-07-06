@@ -57,7 +57,7 @@ if model_file is not None:
         st.error(f"❌ Erreur lors du chargement du modèle: {e}")
         st.stop()
 
-    image_file = st.file_uploader("📤 Téléversez une image IRM (PNG/JPG)", type=["png", "jpg", "jpeg"])
+    image_file = st.file_uploader("📤 Téléversez une image IRM (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
     if image_file is not None:
         img_array, img_pil = preprocess_image(image_file)
         st.image(img_pil, caption="Image originale", use_column_width=True)
