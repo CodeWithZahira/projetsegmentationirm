@@ -8,10 +8,14 @@ import os
 MODEL_PATH = "unet_model.h5"
 FILE_ID = "1ti_-AtZzOHTVzHAHnQJyJuNzfu4TD7IB"
 
+
+
 def download_model():
-    if not os.path.exists(MODEL_PATH):
+    if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 1000:
         st.info("📥 Téléchargement du modèle...")
         gdown.download(id=FILE_ID, output=MODEL_PATH, quiet=False)
+        st.success("✅ Modèle téléchargé.")
+
 
 @st.cache_resource
 def load_model():
