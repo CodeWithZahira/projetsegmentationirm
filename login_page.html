@@ -1,61 +1,129 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Connexion</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: url('https://media2.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aHE0bWpqbnR3b2xsZmI2N2E1cGdlcTY3dnI1OGpic2dhbTI1YnZ2MiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/aSYJnhrGCscyk/200.webp') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .login-container {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
-            width: 350px;
-            text-align: center;
-        }
-        h2 {
-            margin-bottom: 25px;
-            color: #333;
-        }
-        input[type="email"], input[type="password"] {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        button {
-            background-color: #FF4B4B;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #e03a3a;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Connexion - NeuroSeg</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .left {
+      width: 40%;
+      background-color: white;
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .right {
+      width: 60%;
+      background: url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZjE3dGkzcnZvbXBuajJiNmRtNTV2enpkYTNzZmtlYXNvZHY3Y3RsOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/fdLRBZD4AjG9hVwCcM/giphy.gif") no-repeat center center;
+      background-size: cover;
+    }
+
+    .logo {
+      margin-bottom: 30px;
+    }
+
+    .logo img {
+      height: 60px;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+      font-size: 16px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+    }
+
+    .btn-login {
+      background-color: #ff4b4b;
+      color: white;
+    }
+
+    .btn-signup {
+      background-color: transparent;
+      border: 2px solid #ff4b4b;
+      color: #ff4b4b;
+    }
+
+    .socials {
+      display: flex;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .socials img {
+      width: 40px;
+      cursor: pointer;
+    }
+
+    .separator {
+      margin: 20px 0;
+      color: #aaa;
+    }
+
+    @media screen and (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .left, .right {
+        width: 100%;
+        height: 50vh;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Connexion</h2>
-        <input type="email" placeholder="Email" required>
-        <input type="password" placeholder="Mot de passe" required>
-        <br>
-        <button>Se connecter</button>
+  <div class="container">
+    <div class="left">
+      <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Logo_universite_mohammed_V_rabat.png" alt="UM5 Logo">
+      </div>
+      <h2>Bienvenue à NeuroSeg</h2>
+      <input type="email" placeholder="Email">
+      <input type="password" placeholder="Mot de passe">
+      <button class="btn btn-login">Se connecter</button>
+      <button class="btn btn-signup">S'inscrire</button>
+      <div class="separator">ou continuer avec</div>
+      <div class="socials">
+        <img src="https://cdn-icons-png.flaticon.com/512/281/281764.png" alt="Google">
+        <img src="https://cdn-icons-png.flaticon.com/512/831/831276.png" alt="Apple">
+      </div>
     </div>
+    <div class="right"></div>
+  </div>
 </body>
 </html>
