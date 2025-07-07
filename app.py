@@ -19,7 +19,7 @@ section_styles = """
 #section1 {
   background: url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
   background-size: cover;
-  padding: 50px;
+  padding: 500px;
   border-radius: 15px;
   color: white;
 }
