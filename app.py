@@ -47,7 +47,7 @@ def display_prediction(image_pil, mask):
     st.image(buf)
 
 # =============================
-# 💅 STYLES AND ANIMATION
+# 🎅 STYLES AND ANIMATION
 # =============================
 st.markdown("""
     <style>
@@ -66,6 +66,7 @@ st.markdown("""
         padding: 1rem 2rem;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         z-index: 9999;
     }
     .navbar a {
@@ -78,10 +79,8 @@ st.markdown("""
     .navbar a:hover {
         text-decoration: underline;
     }
-    .logo {
-        font-size: 20px;
-        font-weight: bold;
-        color: #fff;
+    .logo-img {
+        height: 40px;
     }
     .section {
         height: 100vh;
@@ -98,11 +97,11 @@ st.markdown("""
         background-size: cover;
     }
     #predict {
-        background: url('https://static.vecteezy.com/system/resources/previews/028/196/350/original/brain-3d-icon-illustration-free-png.png') no-repeat center center;
+        background: url('https://img.freepik.com/premium-photo/human-brain-3d-illustration-brainstorming-conceptgenerative-ai_841229-1720.jpg') no-repeat center center;
         background-size: cover;
     }
     #about {
-        background: url('https://image.slidesharecdn.com/robots-150823064930-lva1-app6891/95/robotstxt-8-638.jpg?cb=1440312820') no-repeat center center;
+        background: url('https://thumbs.dreamstime.com/b/modern-friendly-robot-artificial-intelligence-greets-raising-his-hand-saying-hello-hallway-office-many-330419098.jpg') no-repeat center center;
         background-size: cover;
     }
     h1.animated-title {
@@ -138,7 +137,7 @@ st.markdown("""
 # =============================
 st.markdown("""
 <div class="navbar">
-  <div class="logo">Université XYZ</div>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Logo_universite_mohammed_V_rabat.png" class="logo-img" alt="University Logo">
   <div>
     <a href="#home">Accueil</a>
     <a href="#predict">Prédiction</a>
@@ -152,15 +151,16 @@ st.markdown("""
 # =============================
 st.markdown("""
 <section id="home" class="section">
-  <h1 class="animated-title">Bienvenue sur NeuroSeg</h1>
-  <h3 style="color:white;">Application de segmentation IRM basée sur l'IA</h3>
-  <p style="color:white;">Crée par Zahira - Université XYZ</p>
+  <h1 class="animated-title">Bienvenue </h1>
+  <h2 class="animated-title">sur NeuroSeg</h2>
+  <h3 style="color:white; text-align: left;">Application de segmentation IRM basée sur l'IA</h3>
+  <p style="color:white; text-align: left;">Crée par Zahira ELLAOUAH </p>
   <a href="#predict"><button class="btn-main">Commencer</button></a>
 </section>
 """, unsafe_allow_html=True)
 
 # =============================
-# 🧠 SECTION: PREDICTION
+# 🧐 SECTION: PREDICTION
 # =============================
 st.markdown("""
 <section id="predict" class="section">
@@ -197,8 +197,8 @@ st.markdown("""
 st.markdown("""
 <section id="about" class="section">
   <h2>📞 Contact</h2>
-  <p>Email: zahira.etudiante@xyz.ac.ma</p>
-  <p style="color:white">Développé dans le cadre du Master en Ingénierie Biomédicale - Université XYZ</p>
+  <p>Email: zahiraellaouah@gmail.com</p>
+  <p style="color:white">Développé dans le cadre du Master en Ingénierie Biomédicale - Université Qadi Ayyad FMPM </p>
 </section>
 """, unsafe_allow_html=True)
 
@@ -208,7 +208,4 @@ st.markdown("""
 st.markdown("""
 <hr>
 <p style='text-align: center; color: white;'>© 2025 NeuroSeg. Made by Zahira.</p>
-<p style='text-align: center;'>🔗 <strong>Exemple de lien vers logo</strong>: 
-<a href="http://www.fmpm.uca.ma/wp-content/uploads/2024/04/logofm-1.png" target="_blank">
-Logo UM5</a></p>
 """, unsafe_allow_html=True)
