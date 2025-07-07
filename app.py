@@ -62,11 +62,9 @@ st.markdown("""
     }
     .section {
         padding: 200px 1px;
-        color: white;
         text-align: center;
     }
     .section h1, .section h2, .section h3, .section p {
-        color: white;
     }
     #hero {
         background: url('https://as2.ftcdn.net/v2/jpg/05/81/24/83/1000_F_581248369_1Xhv7gJI1Jt2zvIPxqJEOOv3n9Wrua0S.jpg') no-repeat center center;
