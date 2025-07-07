@@ -34,7 +34,7 @@ def set_bg_from_url(image_url):
         </style>
     """, unsafe_allow_html=True)
 
-bg_image = "https://img.freepik.com/premium-photo/generative-ai-brain-icon_1106493-72175.jpg"
+bg_image = "https://img.freepik.com/premium-photo/brain-ai-technology-concept-3d-rendering_35719-10799.jpg"
 set_bg_from_url(bg_image)
 
 # =============================
