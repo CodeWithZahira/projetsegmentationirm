@@ -28,7 +28,7 @@ def set_bg_from_url(image_url):
         </style>
     """, unsafe_allow_html=True)
 
-bg_image = "https://png.pngtree.com/background/20230617/original/pngtree-blue-brain-3d-model-rendered-on-a-white-background-picture-image_3702527.jpg"
+bg_image = "https://png.pngtree.com/png-vector/20240201/ourmid/pngtree-ai-generative-human-brain-illustration-png-image_11529766.png"
 set_bg_from_url(bg_image)
 
 # =============================
