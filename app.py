@@ -94,15 +94,15 @@ st.markdown("""
         animation: fadeIn 2s ease-in-out;
     }
     #home {
-        background: url('https://images.unsplash.com/photo-1603791440384-56cd371ee9a7') no-repeat center center;
+        background: url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
         background-size: cover;
     }
     #predict {
-        background: url('https://images.unsplash.com/photo-1581093588401-01059c8a207c') no-repeat center center;
+        background: url('https://i.pinimg.com/originals/a2/33/e8/a233e808eb74686d9544b3960b0f1eb9.jpg') no-repeat center center;
         background-size: cover;
     }
     #about {
-        background: url('https://images.unsplash.com/photo-1530026405186-ed1f139313d7') no-repeat center center;
+        background: url('https://www.genengnews.com/wp-content/uploads/2023/08/GettyImages-1421511892.jpg') no-repeat center center;
         background-size: cover;
     }
     h1.animated-title {
