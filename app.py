@@ -4,77 +4,11 @@ from PIL import Image
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import io
-import base64
 
 # =============================
 # 🎨 PAGE CONFIG
 # =============================
 st.set_page_config(page_title="NeuroSeg", layout="wide")
-
-# =============================
-# 🖼️ BACKGROUND CSS + NAVBAR
-# =============================
-nav_style = """
-    <style>
-    .stApp {
-        background-image: url('https://images.unsplash.com/photo-1581093588401-01059c8a207c');
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-    }
-    .main {
-        background-color: rgba(0, 0, 0, 0.65);
-        padding: 2rem;
-        border-radius: 15px;
-    }
-    h1, h2, h3, h4, h5, h6, p, label, .stButton>button {
-        color: white !important;
-    }
-    .custom-navbar {
-        background-color: rgba(0,0,0,0.4);
-        padding: 1rem;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .custom-navbar a {
-        margin: 0 1.5rem;
-        color: white;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 1.1rem;
-    }
-    .custom-navbar a:hover {
-        text-decoration: underline;
-    }
-    .logo {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: white;
-    }
-    .spacer {
-        height: 80px;
-    }
-    </style>
-"""
-st.markdown(nav_style, unsafe_allow_html=True)
-
-st.markdown("""
-<div class="custom-navbar">
-    <div class="logo">NeuroSeg</div>
-    <div>
-        <a href="#header">Accueil</a>
-        <a href="#predict">Prédire</a>
-        <a href="#about">À propos</a>
-    </div>
-</div>
-<div class="spacer"></div>
-""", unsafe_allow_html=True)
 
 # =============================
 # 🔧 UTILITIES
@@ -90,7 +24,6 @@ def preprocess_image(uploaded_file, target_size=(128, 128)):
 def tflite_predict(interpreter, input_data):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
-
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     output_data = interpreter.get_tensor(output_details[0]['index'])
@@ -114,22 +47,110 @@ def display_prediction(image_pil, mask):
     st.image(buf)
 
 # =============================
-# 🧠 SECTION 1: HEADER
+# 💅 STYLES
 # =============================
-st.markdown("<div class='main' id='header'>", unsafe_allow_html=True)
 st.markdown("""
-    <h1 style='text-align: center;'>🧠 NeuroSeg: Brain MRI Segmentation</h1>
-    <h4 style='text-align: center;'>A deep learning-powered assistant for brain MRI image segmentation</h4>
+    <style>
+    html, body, .stApp {
+        font-family: 'Segoe UI', sans-serif;
+        scroll-behavior: smooth;
+    }
+    .section {
+        padding: 100px 30px;
+        color: white;
+        text-align: center;
+    }
+    .section h1, .section h2, .section h3, .section p {
+        color: white;
+    }
+    #hero {
+        background: url('https://images.unsplash.com/photo-1581093588401-01059c8a207c') no-repeat center center;
+        background-size: cover;
+    }
+    #predict-section {
+        background: url('https://images.unsplash.com/photo-1603791440384-56cd371ee9a7') no-repeat center center;
+        background-size: cover;
+    }
+    #about-section {
+        background: #111;
+    }
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        z-index: 9999;
+    }
+    .navbar a {
+        color: white;
+        margin: 0 15px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .navbar a:hover {
+        text-decoration: underline;
+    }
+    .logo {
+        font-size: 20px;
+        font-weight: bold;
+        color: #fff;
+    }
+    .btn-main {
+        background-color: #FF4B4B;
+        padding: 10px 25px;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .spacer { height: 80px; }
+    </style>
 """, unsafe_allow_html=True)
-st.markdown("</div>", unsafe_allow_html=True)
 
 # =============================
-# 📥 SECTION 2: Upload + Predict
+# 🔝 NAVBAR
 # =============================
-st.markdown("<div class='main' id='predict'>", unsafe_allow_html=True)
-st.subheader("📥 Charger le Modèle TFLite")
+st.markdown("""
+<div class="navbar">
+  <div class="logo">NeuroSeg</div>
+  <div>
+    <a href="#hero">Accueil</a>
+    <a href="#predict-section">Prédire</a>
+    <a href="#about-section">À propos</a>
+  </div>
+</div>
+<div class="spacer"></div>
+""", unsafe_allow_html=True)
 
-model_file = st.file_uploader("Téléversez votre modèle (.tflite)", type=["tflite"])
+# =============================
+# 🧠 SECTION 1: HERO
+# =============================
+st.markdown("""
+<div id="hero" class="section">
+  <h1>🧠 Bienvenue sur NeuroSeg</h1>
+  <h3>Une application intelligente pour la segmentation d’IRM cérébrales</h3>
+  <p>Alimentée par l'apprentissage profond</p>
+  <br>
+  <a href="#predict-section"><button class="btn-main">Commencer</button></a>
+</div>
+""", unsafe_allow_html=True)
+
+# =============================
+# 📥 SECTION 2: PREDICT
+# =============================
+st.markdown("""
+<div id="predict-section" class="section">
+""", unsafe_allow_html=True)
+
+st.header("🧠 Lancer une prédiction")
+model_file = st.file_uploader("📥 Téléversez le modèle TFLite", type=["tflite"])
 if model_file is not None:
     try:
         tflite_model = model_file.read()
@@ -138,38 +159,39 @@ if model_file is not None:
         st.success("✅ Modèle TFLite chargé avec succès.")
         model_loaded = True
     except Exception as e:
-        st.error(f"❌ Erreur lors du chargement du modèle: {e}")
+        st.error(f"❌ Erreur de chargement: {e}")
         model_loaded = False
 else:
     model_loaded = False
 
-st.subheader("🖼️ Téléverser une Image IRM")
-
-image_file = st.file_uploader("Chargez une image IRM (PNG, JPG, TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
+image_file = st.file_uploader("📷 Téléversez une image IRM (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
 if image_file is not None and model_loaded:
     img_array, img_pil = preprocess_image(image_file)
     st.image(img_pil, caption="Image originale", use_column_width=True)
 
-    if st.button("🧠 Lancer la prédiction"):
+    if st.button("🔍 Prédire la segmentation"):
         pred_mask = tflite_predict(interpreter, img_array)
-        st.success("✅ Prédiction terminée !")
         display_prediction(img_pil, pred_mask)
 
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("""</div>""", unsafe_allow_html=True)
 
 # =============================
-# 📚 SECTION 3: About
+# ℹ️ SECTION 3: ABOUT
 # =============================
-st.markdown("<div class='main' id='about'>", unsafe_allow_html=True)
-st.subheader("📚 À propos")
 st.markdown("""
-Cette application a été développée par **Zahira** dans le cadre de son projet de Master en Ingénierie Biomédicale. 
-Elle vise à assister les professionnels de santé dans la segmentation des IRM cérébrales à l'aide de l'intelligence artificielle.
-""")
-st.markdown("</div>", unsafe_allow_html=True)
+<div id="about-section" class="section">
+  <h2>📚 À propos de cette application</h2>
+  <p>
+    Cette application a été développée par <strong>Zahira</strong> dans le cadre de son projet de Master en Ingénierie Biomédicale.<br>
+    Elle vise à assister les professionnels de santé dans la détection des tumeurs cérébrales via l'IA.
+  </p>
+</div>
+""", unsafe_allow_html=True)
 
 # =============================
 # 🔻 FOOTER
 # =============================
-st.markdown("<hr>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #ffffff;'>Made with ❤️ by Zahira | 2025</p>", unsafe_allow_html=True)
+st.markdown("""
+<hr>
+<p style='text-align: center; color: white;'>© 2025 NeuroSeg. Made with ❤️ by Zahira.</p>
+""", unsafe_allow_html=True)
