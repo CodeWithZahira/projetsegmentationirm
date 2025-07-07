@@ -109,6 +109,7 @@ st.markdown("""
         font-size: 3.5em;
         animation: slideDown 2s ease-out;
         color: black;
+        text-align: left;
     }
     @keyframes slideDown {
         0% { opacity: 0; transform: translateY(-50px); }
