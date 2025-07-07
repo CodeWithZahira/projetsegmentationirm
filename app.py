@@ -28,7 +28,7 @@ def set_bg_from_url(image_url):
         </style>
     """, unsafe_allow_html=True)
 
-bg_image = "https://images.unsplash.com/photo-1581093588401-01059c8a207c"
+bg_image = "https://www.genengnews.com/wp-content/uploads/2023/08/GettyImages-1421511892.jpg"
 set_bg_from_url(bg_image)
 
 # =============================
