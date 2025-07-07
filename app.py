@@ -27,7 +27,7 @@ def set_bg_from_url(image_url):
         </style>
     """, unsafe_allow_html=True)
 
-bg_image = "https://img.freepik.com/premium-psd/human-brain-ai-microchip-sensor-icon-isolated-ai-support-artificial-intelligence-3d-illustration_570783-1300.jpg"
+bg_image = "https://as1.ftcdn.net/v2/jpg/06/09/64/42/1000_F_609644210_RSe84rM4Ad1ZAwZ5MvJqh3VCdb0L3wOx.jpg"
 set_bg_from_url(bg_image)
 
 # =============================
