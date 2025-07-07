@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import io
 import requests
 import base64
+
 # =============================
 # 🎨 PAGE CONFIG
 # =============================
@@ -23,6 +24,12 @@ def set_bg_from_url(image_url):
             background-image: url("data:image/png;base64,{encoded_string}");
             background-size: cover;
             background-attachment: fixed;
+        }}
+        h1, h2, h3, h4, h5, h6, p, div, span, label {{
+            color: white !important;
+        }}
+        .css-1v0mbdj.eknhn3m10 {{
+            background-color: rgba(0, 0, 0, 0.5); /* optional dark background overlay */
         }}
         </style>
     """, unsafe_allow_html=True)
@@ -73,8 +80,8 @@ def display_prediction(image_pil, mask):
 
 # ----- Header -----
 st.markdown("""
-    <h1 style='text-align: center; color: #ffffff;'>🧠 NeuroSeg: Brain MRI Segmentation</h1>
-    <h4 style='text-align: center; color: #dddddd;'>A deep learning-powered assistant for brain MRI image segmentation</h4>
+    <h1 style='text-align: center; color: white;'>🧠 NeuroSeg: Brain MRI Segmentation</h1>
+    <h4 style='text-align: center; color: white;'>A deep learning-powered assistant for brain MRI image segmentation</h4>
 """, unsafe_allow_html=True)
 
 st.markdown("---")
@@ -122,4 +129,4 @@ Elle vise à assister les professionnels de santé dans la segmentation des IRM 
 
 # ----- Footer -----
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: #cccccc;'>Made with ❤️ by Zahira | 2025</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: white;'>Made with ❤️ by Zahira | 2025</p>", unsafe_allow_html=True)
