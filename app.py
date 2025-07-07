@@ -34,7 +34,7 @@ def set_bg_from_url(image_url):
         </style>
     """, unsafe_allow_html=True)
 
-bg_image = "https://cdn.pixabay.com/photo/2024/04/27/18/50/ai-generated-8724193_1280.jpg"
+bg_image = "https://cdn.pixabay.com/photo/2024/01/09/03/24/ai-generated-8496704_1280.jpg"
 set_bg_from_url(bg_image)
 
 # =============================
