@@ -137,7 +137,7 @@ st.markdown("""
 # =============================
 st.markdown("""
 <div class="navbar">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Logo_universite_mohammed_V_rabat.png" class="logo-img" alt="University Logo">
+  <img src="http://www.fmpm.uca.ma/wp-content/uploads/2024/04/logofm-1.png" class="logo-img" alt="University Logo">
   <div>
     <a href="#home">Accueil</a>
     <a href="#predict">Prédiction</a>
