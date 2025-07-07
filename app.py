@@ -69,7 +69,7 @@ st.markdown("""
         z-index: 9999;
     }
     .navbar a {
-        color: white;
+        color: black;
         margin: 0 15px;
         text-decoration: none;
         font-weight: bold;
