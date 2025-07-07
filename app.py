@@ -20,21 +20,21 @@ section_styles = """
   background: url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
   background-size: cover;
   padding: 500px;
-  border-radius: 15px;
+  border-radius: 5px;
   color: white;
 }
 #section2 {
   background: url('https://cdn.pixabay.com/photo/2024/01/09/03/24/ai-generated-8496704_1280.jpg') no-repeat center center;
   background-size: cover;
-  padding: 50px;
-  border-radius: 15px;
+  padding: 500px;
+  border-radius: 5px;
   color: white;
 }
 #section3 {
   background: url('https://tse1.mm.bing.net/th/id/OIP.Q5jvjjsGVByg4_mzDdjAGAHaEK?pid=Api&P=0&h=180') no-repeat center center;
   background-size: cover;
-  padding: 50px;
-  border-radius: 15px;
+  padding: 500px;
+  border-radius: 5px;
   color: white;
 }
 </style>
