@@ -8,7 +8,7 @@ import io
 # =============================
 # 🎨 PAGE CONFIG
 # =============================
-st.set_page_config(page_title="NeuroSeg", layout="wide")
+st.set_page_config(page_title="NeuroSeg", layout="wide", color: black)
 
 # =============================
 # 🔧 UTILITIES
