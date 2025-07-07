@@ -1,4 +1,15 @@
 import streamlit as st
+import streamlit.components.v1 as components
+
+# Lire et afficher le HTML personnalisé pour la page de connexion
+with open("login_page.html", "r", encoding="utf-8") as f:
+    html = f.read()
+components.html(html, height=800, scrolling=False)
+st.stop()  
+
+
+
+import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
