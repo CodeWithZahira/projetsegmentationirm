@@ -5,63 +5,14 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import io
 
-# ============== PAGE CONFIG ===================
-st.set_page_config(page_title="NeuroSeg - IRM App", layout="wide")
+# =============================
+# 🎨 PAGE CONFIG
+# =============================
+st.set_page_config(page_title="NeuroSeg", layout="wide")
 
-# ============== STYLES ===================
-st.markdown("""
-    <style>
-    html, body, .stApp {
-        height: 100%;
-        margin: 0;
-        font-family: 'Segoe UI', sans-serif;
-        background: url('https://img.freepik.com/premium-photo/concept-art-human-brain-exploding-with-knowledge-creativity-generative-ai_438099-10972.jpg') no-repeat center center fixed;
-        background-size: cover;
-        color: white;
-    }
-
-    h1 {
-        font-size: 3.5em;
-        font-weight: bold;
-        animation: fadeIn 2s ease-in-out;
-    }
-
-    h2, h3 {
-        color: white;
-    }
-
-    .container {
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 60px 40px;
-        border-radius: 15px;
-        margin-top: 100px;
-    }
-
-    .btn-main {
-        background-color: #FF4B4B;
-        padding: 10px 25px;
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 25px;
-        font-size: 16px;
-        cursor: pointer;
-    }
-
-    .prediction-section {
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 30px;
-        border-radius: 12px;
-    }
-
-    @keyframes fadeIn {
-        0% {opacity: 0; transform: translateY(-20px);}
-        100% {opacity: 1; transform: translateY(0);}
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# ============== UTILS ===================
+# =============================
+# 🔧 UTILITIES
+# =============================
 def preprocess_image(uploaded_file, target_size=(128, 128)):
     image = Image.open(uploaded_file).convert("L")
     image = image.resize(target_size)
@@ -95,40 +46,164 @@ def display_prediction(image_pil, mask):
     plt.savefig(buf, format="png")
     st.image(buf)
 
-# ============== MAIN UI ===================
-with st.container():
-    st.markdown("<h1 style='text-align: center;'>🧠 NeuroSeg</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center;'>Une application IA pour la segmentation des IRM</h3>", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown("<div class='prediction-section'>", unsafe_allow_html=True)
-        st.header("📤 Upload et Prédiction")
-
-        model_file = st.file_uploader("Téléversez votre modèle TFLite (.tflite)", type=["tflite"])
-        model_loaded = False
-        if model_file is not None:
-            try:
-                tflite_model = model_file.read()
-                interpreter = tf.lite.Interpreter(model_content=tflite_model)
-                interpreter.allocate_tensors()
-                st.success("✅ Modèle chargé avec succès.")
-                model_loaded = True
-            except Exception as e:
-                st.error(f"❌ Erreur: {e}")
-
-        image_file = st.file_uploader("Téléversez une image IRM (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
-        if image_file is not None and model_loaded:
-            img_array, img_pil = preprocess_image(image_file)
-            st.image(img_pil, caption="Image originale", use_column_width=True)
-
-            if st.button("🧠 Lancer la prédiction", type="primary"):
-                pred_mask = tflite_predict(interpreter, img_array)
-                display_prediction(img_pil, pred_mask)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# ============== FOOTER ===================
+# =============================
+# 💅 STYLES AND ANIMATION
+# =============================
 st.markdown("""
-<br><br><hr>
-<p style='text-align: center;'>© 2025 NeuroSeg — by Zahira</p>
+    <style>
+    html, body, .stApp {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', sans-serif;
+        scroll-behavior: smooth;
+    }
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        z-index: 9999;
+    }
+    .navbar a {
+        color: white;
+        margin: 0 15px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .navbar a:hover {
+        text-decoration: underline;
+    }
+    .logo {
+        font-size: 20px;
+        font-weight: bold;
+        color: #fff;
+    }
+    .section {
+        height: 100vh;
+        padding: 100px 40px;
+        color: white;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        animation: fadeIn 2s ease-in-out;
+    }
+    #home {
+        background: url('https://images.unsplash.com/photo-1603791440384-56cd371ee9a7') no-repeat center center;
+        background-size: cover;
+    }
+    #predict {
+        background: url('https://images.unsplash.com/photo-1581093588401-01059c8a207c') no-repeat center center;
+        background-size: cover;
+    }
+    #about {
+        background: url('https://images.unsplash.com/photo-1530026405186-ed1f139313d7') no-repeat center center;
+        background-size: cover;
+    }
+    h1.animated-title {
+        font-size: 3.5em;
+        animation: slideDown 2s ease-out;
+    }
+    @keyframes slideDown {
+        0% { opacity: 0; transform: translateY(-50px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+    .btn-main {
+        background-color: #FF4B4B;
+        padding: 10px 25px;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# =============================
+# 🔝 NAVBAR
+# =============================
+st.markdown("""
+<div class="navbar">
+  <div class="logo">Université XYZ</div>
+  <div>
+    <a href="#home">Accueil</a>
+    <a href="#predict">Prédiction</a>
+    <a href="#about">Contact</a>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# =============================
+# 🏠 SECTION: HOME
+# =============================
+st.markdown("""
+<section id="home" class="section">
+  <h1 class="animated-title">Bienvenue sur NeuroSeg</h1>
+  <h3>Application de segmentation IRM basée sur l'IA</h3>
+  <p>Crée par Zahira - Université XYZ</p>
+  <a href="#predict"><button class="btn-main">Commencer</button></a>
+</section>
+""", unsafe_allow_html=True)
+
+# =============================
+# 🧠 SECTION: PREDICTION
+# =============================
+st.markdown("""
+<section id="predict" class="section">
+  <h2>🧠 Téléversez et prédisez</h2>
+""", unsafe_allow_html=True)
+
+model_file = st.file_uploader("Modèle TFLite (.tflite)", type=["tflite"])
+model_loaded = False
+if model_file is not None:
+    try:
+        tflite_model = model_file.read()
+        interpreter = tf.lite.Interpreter(model_content=tflite_model)
+        interpreter.allocate_tensors()
+        st.success("✅ Modèle chargé")
+        model_loaded = True
+    except Exception as e:
+        st.error(f"❌ Erreur: {e}")
+
+image_file = st.file_uploader("Image IRM (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
+if image_file and model_loaded:
+    img_array, img_pil = preprocess_image(image_file)
+    st.image(img_pil, caption="Image originale", use_column_width=True)
+    if st.button("🔍 Prédire"):
+        pred_mask = tflite_predict(interpreter, img_array)
+        display_prediction(img_pil, pred_mask)
+
+st.markdown("""
+</section>
+""", unsafe_allow_html=True)
+
+# =============================
+# ℹ️ SECTION: ABOUT / CONTACT
+# =============================
+st.markdown("""
+<section id="about" class="section">
+  <h2>📞 Contact</h2>
+  <p>Développé dans le cadre du Master en Ingénierie Biomédicale - Université XYZ</p>
+  <p>Email: zahira.etudiante@xyz.ac.ma</p>
+</section>
+""", unsafe_allow_html=True)
+
+# =============================
+# 🔻 FOOTER
+# =============================
+st.markdown("""
+<hr>
+<p style='text-align: center; color: white;'>© 2025 NeuroSeg. Made by Zahira.</p>
 """, unsafe_allow_html=True)
