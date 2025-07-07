@@ -61,7 +61,7 @@ st.markdown("""
         scroll-behavior: smooth;
     }
     .section {
-        padding: 500px 30px;
+        padding: 200px 15px;
         color: white;
         text-align: center;
     }
