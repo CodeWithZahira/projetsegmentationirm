@@ -4,7 +4,6 @@ from PIL import Image
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import io
-import requests
 import base64
 
 # =============================
@@ -13,29 +12,34 @@ import base64
 st.set_page_config(page_title="NeuroSeg", layout="wide")
 
 # =============================
-# 🖼️ BACKGROUND SETUP (using base64 image)
+# 🖼️ BACKGROUND CSS PER SECTION
 # =============================
-def set_bg_from_url(image_url):
-    response = requests.get(image_url)
-    encoded_string = base64.b64encode(response.content).decode()
-    st.markdown(f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/png;base64,{encoded_string}");
-            background-size: cover;
-            background-attachment: fixed;
-        }}
-        h1, h2, h3, h4, h5, h6, p, div, span, label {{
-            color: white !important;
-        }}
-        .css-1v0mbdj.eknhn3m10 {{
-            background-color: rgba(0, 0, 0, 0.5); /* optional dark background overlay */
-        }}
-        </style>
-    """, unsafe_allow_html=True)
-
-bg_image = "https://cdn.pixabay.com/photo/2024/01/09/03/24/ai-generated-8496704_1280.jpg"
-set_bg_from_url(bg_image)
+section_styles = """
+<style>
+#section1 {
+  background: url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
+  background-size: cover;
+  padding: 50px;
+  border-radius: 15px;
+  color: white;
+}
+#section2 {
+  background: url('https://cdn.pixabay.com/photo/2024/01/09/03/24/ai-generated-8496704_1280.jpg') no-repeat center center;
+  background-size: cover;
+  padding: 50px;
+  border-radius: 15px;
+  color: white;
+}
+#section3 {
+  background: url('https://tse1.mm.bing.net/th/id/OIP.Q5jvjjsGVByg4_mzDdjAGAHaEK?pid=Api&P=0&h=180') no-repeat center center;
+  background-size: cover;
+  padding: 50px;
+  border-radius: 15px;
+  color: white;
+}
+</style>
+"""
+st.markdown(section_styles, unsafe_allow_html=True)
 
 # =============================
 # 🔧 UTILITIES
@@ -75,58 +79,65 @@ def display_prediction(image_pil, mask):
     st.image(buf)
 
 # =============================
-# 🧠 APP STRUCTURE (scroll layout)
+# 🧠 SECTION 1: HEADER
 # =============================
+with st.container():
+    st.markdown('<div id="section1">', unsafe_allow_html=True)
+    st.markdown("""
+        <h1 style='text-align: center;'>🧠 NeuroSeg: Brain MRI Segmentation</h1>
+        <h4 style='text-align: center;'>A deep learning-powered assistant for brain MRI image segmentation</h4>
+    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# ----- Header -----
-st.markdown("""
-    <h1 style='text-align: center; color: white;'>🧠 NeuroSeg: Brain MRI Segmentation</h1>
-    <h4 style='text-align: center; color: white;'>A deep learning-powered assistant for brain MRI image segmentation</h4>
-""", unsafe_allow_html=True)
+# =============================
+# 📥 SECTION 2: Upload + Predict
+# =============================
+with st.container():
+    st.markdown('<div id="section2">', unsafe_allow_html=True)
+    st.subheader("📥 Charger le Modèle TFLite")
 
-st.markdown("---")
-
-# ----- Section: Upload model -----
-st.subheader("📥 Charger le Modèle TFLite")
-
-model_file = st.file_uploader("Téléversez votre modèle (.tflite)", type=["tflite"])
-if model_file is not None:
-    try:
-        tflite_model = model_file.read()
-        interpreter = tf.lite.Interpreter(model_content=tflite_model)
-        interpreter.allocate_tensors()
-        st.success("✅ Modèle TFLite chargé avec succès.")
-        model_loaded = True
-    except Exception as e:
-        st.error(f"❌ Erreur lors du chargement du modèle: {e}")
+    model_file = st.file_uploader("Téléversez votre modèle (.tflite)", type=["tflite"])
+    if model_file is not None:
+        try:
+            tflite_model = model_file.read()
+            interpreter = tf.lite.Interpreter(model_content=tflite_model)
+            interpreter.allocate_tensors()
+            st.success("✅ Modèle TFLite chargé avec succès.")
+            model_loaded = True
+        except Exception as e:
+            st.error(f"❌ Erreur lors du chargement du modèle: {e}")
+            model_loaded = False
+    else:
         model_loaded = False
-else:
-    model_loaded = False
 
-st.markdown("---")
+    st.subheader("🖼️ Téléverser une Image IRM")
 
-# ----- Section: Image upload & prediction -----
-st.subheader("🖼️ Téléverser une Image IRM")
+    image_file = st.file_uploader("Chargez une image IRM (PNG, JPG, TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
+    if image_file is not None and model_loaded:
+        img_array, img_pil = preprocess_image(image_file)
+        st.image(img_pil, caption="Image originale", use_column_width=True)
 
-image_file = st.file_uploader("Chargez une image IRM (PNG, JPG, TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
-if image_file is not None and model_loaded:
-    img_array, img_pil = preprocess_image(image_file)
-    st.image(img_pil, caption="Image originale", use_column_width=True)
+        if st.button("🧠 Lancer la prédiction"):
+            pred_mask = tflite_predict(interpreter, img_array)
+            st.success("✅ Prédiction terminée !")
+            display_prediction(img_pil, pred_mask)
 
-    if st.button("🧠 Lancer la prédiction"):
-        pred_mask = tflite_predict(interpreter, img_array)
-        st.success("✅ Prédiction terminée !")
-        display_prediction(img_pil, pred_mask)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("---")
+# =============================
+# 📚 SECTION 3: About
+# =============================
+with st.container():
+    st.markdown('<div id="section3">', unsafe_allow_html=True)
+    st.subheader("📚 À propos")
+    st.markdown("""
+    Cette application a été développée par **Zahira** dans le cadre de son projet de Master en Ingénierie Biomédicale. 
+    Elle vise à assister les professionnels de santé dans la segmentation des IRM cérébrales à l'aide de l'intelligence artificielle.
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# ----- About section -----
-st.subheader("📚 À propos")
-st.markdown("""
-Cette application a été développée par **Zahira** dans le cadre de son projet de Master en Ingénierie Biomédicale. 
-Elle vise à assister les professionnels de santé dans la segmentation des IRM cérébrales à l'aide de l'intelligence artificielle.
-""")
-
-# ----- Footer -----
-st.markdown("---")
-st.markdown("<p style='text-align: center; color: white;'>Made with ❤️ by Zahira | 2025</p>", unsafe_allow_html=True)
+# =============================
+# 🔻 FOOTER
+# =============================
+st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #cccccc;'>Made with ❤️ by Zahira | 2025</p>", unsafe_allow_html=True)
