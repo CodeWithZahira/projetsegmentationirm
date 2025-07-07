@@ -12,34 +12,69 @@ import base64
 st.set_page_config(page_title="NeuroSeg", layout="wide")
 
 # =============================
-# 🖼️ BACKGROUND CSS PER SECTION
+# 🖼️ BACKGROUND CSS + NAVBAR
 # =============================
-section_styles = """
-<style>
-#section1 {
-  background: url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
-  background-size: cover;
-  padding: 500px;
-  border-radius: 5px;
-  color: white;
-}
-#section2 {
-  background: url('https://cdn.pixabay.com/photo/2024/01/09/03/24/ai-generated-8496704_1280.jpg') no-repeat center center;
-  background-size: cover;
-  padding: 500px;
-  border-radius: 5px;
-  color: white;
-}
-#section3 {
-  background: url('https://tse1.mm.bing.net/th/id/OIP.Q5jvjjsGVByg4_mzDdjAGAHaEK?pid=Api&P=0&h=180') no-repeat center center;
-  background-size: cover;
-  padding: 500px;
-  border-radius: 5px;
-  color: white;
-}
-</style>
+nav_style = """
+    <style>
+    .stApp {
+        background-image: url('https://images.unsplash.com/photo-1581093588401-01059c8a207c');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+    }
+    .main {
+        background-color: rgba(0, 0, 0, 0.65);
+        padding: 2rem;
+        border-radius: 15px;
+    }
+    h1, h2, h3, h4, h5, h6, p, label, .stButton>button {
+        color: white !important;
+    }
+    .custom-navbar {
+        background-color: rgba(0,0,0,0.4);
+        padding: 1rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .custom-navbar a {
+        margin: 0 1.5rem;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .custom-navbar a:hover {
+        text-decoration: underline;
+    }
+    .logo {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: white;
+    }
+    .spacer {
+        height: 80px;
+    }
+    </style>
 """
-st.markdown(section_styles, unsafe_allow_html=True)
+st.markdown(nav_style, unsafe_allow_html=True)
+
+st.markdown("""
+<div class="custom-navbar">
+    <div class="logo">NeuroSeg</div>
+    <div>
+        <a href="#header">Accueil</a>
+        <a href="#predict">Prédire</a>
+        <a href="#about">À propos</a>
+    </div>
+</div>
+<div class="spacer"></div>
+""", unsafe_allow_html=True)
 
 # =============================
 # 🔧 UTILITIES
@@ -81,63 +116,60 @@ def display_prediction(image_pil, mask):
 # =============================
 # 🧠 SECTION 1: HEADER
 # =============================
-with st.container():
-    st.markdown('<div id="section1">', unsafe_allow_html=True)
-    st.markdown("""
-        <h1 style='text-align: center;'>🧠 NeuroSeg: Brain MRI Segmentation</h1>
-        <h4 style='text-align: center;'>A deep learning-powered assistant for brain MRI image segmentation</h4>
-    """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<div class='main' id='header'>", unsafe_allow_html=True)
+st.markdown("""
+    <h1 style='text-align: center;'>🧠 NeuroSeg: Brain MRI Segmentation</h1>
+    <h4 style='text-align: center;'>A deep learning-powered assistant for brain MRI image segmentation</h4>
+""", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # =============================
 # 📥 SECTION 2: Upload + Predict
 # =============================
-with st.container():
-    st.markdown('<div id="section2">', unsafe_allow_html=True)
-    st.subheader("📥 Charger le Modèle TFLite")
+st.markdown("<div class='main' id='predict'>", unsafe_allow_html=True)
+st.subheader("📥 Charger le Modèle TFLite")
 
-    model_file = st.file_uploader("Téléversez votre modèle (.tflite)", type=["tflite"])
-    if model_file is not None:
-        try:
-            tflite_model = model_file.read()
-            interpreter = tf.lite.Interpreter(model_content=tflite_model)
-            interpreter.allocate_tensors()
-            st.success("✅ Modèle TFLite chargé avec succès.")
-            model_loaded = True
-        except Exception as e:
-            st.error(f"❌ Erreur lors du chargement du modèle: {e}")
-            model_loaded = False
-    else:
+model_file = st.file_uploader("Téléversez votre modèle (.tflite)", type=["tflite"])
+if model_file is not None:
+    try:
+        tflite_model = model_file.read()
+        interpreter = tf.lite.Interpreter(model_content=tflite_model)
+        interpreter.allocate_tensors()
+        st.success("✅ Modèle TFLite chargé avec succès.")
+        model_loaded = True
+    except Exception as e:
+        st.error(f"❌ Erreur lors du chargement du modèle: {e}")
         model_loaded = False
+else:
+    model_loaded = False
 
-    st.subheader("🖼️ Téléverser une Image IRM")
+st.subheader("🖼️ Téléverser une Image IRM")
 
-    image_file = st.file_uploader("Chargez une image IRM (PNG, JPG, TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
-    if image_file is not None and model_loaded:
-        img_array, img_pil = preprocess_image(image_file)
-        st.image(img_pil, caption="Image originale", use_column_width=True)
+image_file = st.file_uploader("Chargez une image IRM (PNG, JPG, TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
+if image_file is not None and model_loaded:
+    img_array, img_pil = preprocess_image(image_file)
+    st.image(img_pil, caption="Image originale", use_column_width=True)
 
-        if st.button("🧠 Lancer la prédiction"):
-            pred_mask = tflite_predict(interpreter, img_array)
-            st.success("✅ Prédiction terminée !")
-            display_prediction(img_pil, pred_mask)
+    if st.button("🧠 Lancer la prédiction"):
+        pred_mask = tflite_predict(interpreter, img_array)
+        st.success("✅ Prédiction terminée !")
+        display_prediction(img_pil, pred_mask)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # =============================
 # 📚 SECTION 3: About
 # =============================
-with st.container():
-    st.markdown('<div id="section3">', unsafe_allow_html=True)
-    st.subheader("📚 À propos")
-    st.markdown("""
-    Cette application a été développée par **Zahira** dans le cadre de son projet de Master en Ingénierie Biomédicale. 
-    Elle vise à assister les professionnels de santé dans la segmentation des IRM cérébrales à l'aide de l'intelligence artificielle.
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<div class='main' id='about'>", unsafe_allow_html=True)
+st.subheader("📚 À propos")
+st.markdown("""
+Cette application a été développée par **Zahira** dans le cadre de son projet de Master en Ingénierie Biomédicale. 
+Elle vise à assister les professionnels de santé dans la segmentation des IRM cérébrales à l'aide de l'intelligence artificielle.
+""")
+st.markdown("</div>", unsafe_allow_html=True)
 
 # =============================
 # 🔻 FOOTER
 # =============================
 st.markdown("<hr>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #cccccc;'>Made with ❤️ by Zahira | 2025</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #ffffff;'>Made with ❤️ by Zahira | 2025</p>", unsafe_allow_html=True)
