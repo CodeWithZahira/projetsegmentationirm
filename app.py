@@ -85,7 +85,7 @@ st.markdown("""
     }
     .section {
         height: 100vh;
-        padding: 100px 40px;
+        padding: 100px 100px;
         color: white;
         text-align: center;
         display: flex;
