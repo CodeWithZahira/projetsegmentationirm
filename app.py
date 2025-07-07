@@ -13,6 +13,29 @@ st.set_page_config(page_title="NeuroSeg", layout="wide")
 # =============================
 # 🔧 UTILITIES
 # =============================
+def set_bg_from_url(image_url):
+    response = requests.get(image_url)
+    encoded_string = base64.b64encode(response.content).decode()
+    st.markdown(f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{encoded_string}");
+            background-size: cover;
+            background-attachment: fixed;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+
+bg_image = "https://cdn.pixabay.com/photo/2024/01/09/03/24/ai-generated-8496704_1280.jpg"
+set_bg_from_url(bg_image)
+
+
+
+
+
+
+
+
 def preprocess_image(uploaded_file, target_size=(128, 128)):
     image = Image.open(uploaded_file).convert("L")
     image = image.resize(target_size)
