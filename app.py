@@ -8,7 +8,7 @@ import io
 # =============================
 # 🎨 PAGE CONFIG
 # =============================
-st.set_page_config(page_title="NeuroSeg", layout="wide", color: black)
+st.set_page_config(page_title="NeuroSeg", layout="wide")
 
 # =============================
 # 🔧 UTILITIES
@@ -69,6 +69,7 @@ st.markdown("""
         z-index: 9999;
     }
     .navbar a {
+        color: white;
         margin: 0 15px;
         text-decoration: none;
         font-weight: bold;
@@ -84,7 +85,7 @@ st.markdown("""
     }
     .section {
         height: 100vh;
-        padding: 100px 100px;
+        padding: 100px 40px;
         color: white;
         text-align: center;
         display: flex;
@@ -97,16 +98,17 @@ st.markdown("""
         background-size: cover;
     }
     #predict {
-        background: url('https://i.pinimg.com/originals/a2/33/e8/a233e808eb74686d9544b3960b0f1eb9.jpg') no-repeat center center;
+        background: url('https://static.vecteezy.com/system/resources/previews/028/196/350/original/brain-3d-icon-illustration-free-png.png') no-repeat center center;
         background-size: cover;
     }
     #about {
-        background: url('https://www.genengnews.com/wp-content/uploads/2023/08/GettyImages-1421511892.jpg') no-repeat center center;
+        background: url('https://image.slidesharecdn.com/robots-150823064930-lva1-app6891/95/robotstxt-8-638.jpg?cb=1440312820') no-repeat center center;
         background-size: cover;
     }
     h1.animated-title {
         font-size: 3.5em;
         animation: slideDown 2s ease-out;
+        color: black;
     }
     @keyframes slideDown {
         0% { opacity: 0; transform: translateY(-50px); }
@@ -150,8 +152,8 @@ st.markdown("""
 st.markdown("""
 <section id="home" class="section">
   <h1 class="animated-title">Bienvenue sur NeuroSeg</h1>
-  <h3>Application de segmentation IRM basée sur l'IA</h3>
-  <p>Crée par Zahira - Université XYZ</p>
+  <h3 style="color:white;">Application de segmentation IRM basée sur l'IA</h3>
+  <p style="color:white;">Crée par Zahira - Université XYZ</p>
   <a href="#predict"><button class="btn-main">Commencer</button></a>
 </section>
 """, unsafe_allow_html=True)
@@ -194,8 +196,8 @@ st.markdown("""
 st.markdown("""
 <section id="about" class="section">
   <h2>📞 Contact</h2>
-  <p>Développé dans le cadre du Master en Ingénierie Biomédicale - Université XYZ</p>
   <p>Email: zahira.etudiante@xyz.ac.ma</p>
+  <p style="color:white">Développé dans le cadre du Master en Ingénierie Biomédicale - Université XYZ</p>
 </section>
 """, unsafe_allow_html=True)
 
@@ -205,4 +207,7 @@ st.markdown("""
 st.markdown("""
 <hr>
 <p style='text-align: center; color: white;'>© 2025 NeuroSeg. Made by Zahira.</p>
+<p style='text-align: center;'>🔗 <strong>Exemple de lien vers logo</strong>: 
+<a href="http://www.fmpm.uca.ma/wp-content/uploads/2024/04/logofm-1.png" target="_blank">
+Logo UM5</a></p>
 """, unsafe_allow_html=True)
