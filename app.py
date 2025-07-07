@@ -69,7 +69,7 @@ st.markdown("""
         color: white;
     }
     #hero {
-        background: url('https://cdn.pixabay.com/photo/2024/01/09/03/24/ai-generated-8496704_1280.jpg') no-repeat center center;
+        background: url('https://as2.ftcdn.net/v2/jpg/05/81/24/83/1000_F_581248369_1Xhv7gJI1Jt2zvIPxqJEOOv3n9Wrua0S.jpg') no-repeat center center;
         background-size: cover;
     }
     #predict-section {
