@@ -154,9 +154,9 @@ st.markdown("""
 st.markdown("""
 <section id="home" class="section">
   <h1 class="animated-title">Bienvenue </h1>
-  <h2 class="animated-title">sur NeuroSeg</h2>
-  <h3 style="color:white; text-align: left;">Application de segmentation IRM basée sur l'IA</h3>
-  <p style="color:white; text-align: left;">Crée par Zahira ELLAOUAH </p>
+  <h1 class="animated-title">sur NeuroSeg</h1>
+  <h3 style="color:black; text-align: left;">Application de segmentation IRM basée sur l'IA</h3>
+  <p style="color:black; text-align: left;">Crée par Zahira ELLAOUAH </p>
   <a href="#predict"><button class="btn-main">Commencer</button></a>
 </section>
 """, unsafe_allow_html=True)
