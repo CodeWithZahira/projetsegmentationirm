@@ -200,7 +200,7 @@ st.markdown("""
 <section id="about" class="section">
   <h2>📞 Contact</h2>
   <p>Email: zahiraellaouah@gmail.com</p>
-  <p style="color:white">Développé dans le cadre du Master en Ingénierie Biomédicale - Université Qadi Ayyad FMPM </p>
+  <p style="color:black">Développé dans le cadre du Master en Ingénierie Biomédicale - Université Qadi Ayyad FMPM </p>
 </section>
 """, unsafe_allow_html=True)
 
@@ -209,5 +209,5 @@ st.markdown("""
 # =============================
 st.markdown("""
 <hr>
-<p style='text-align: center; color: white;'>© 2025 NeuroSeg. Made by Zahira.</p>
+<p style='text-align: center; color: black;'>© 2025 NeuroSeg. Made by Zahira.</p>
 """, unsafe_allow_html=True)
