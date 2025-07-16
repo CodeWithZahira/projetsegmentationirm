@@ -67,10 +67,12 @@ st.markdown(f"""
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(45deg, rgba(15, 32, 39, 0.9), rgba(32, 58, 67, 0.9), rgba(44, 83, 100, 0.9));
+    background: linear-gradient(45deg, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
     z-index: -1;
 }}
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj, .custom-footer-box, .custom-footer-box * {
+
+/* Set all text to black */
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj, .custom-footer-box, .custom-footer-box * {{
     color: black !important;
 }}
 
@@ -100,7 +102,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 .animated-button-container .stButton>button, .st-emotion-cache-19n6j20 a {{
     width: 100%;
     background: linear-gradient(45deg, #005c97, #363795);
-    color: white !important;
+    color: black !important;
     border-radius: 50px;
     padding: 15px 30px;
     font-size: 18px;
@@ -108,33 +110,27 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     border: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    text-decoration: none; /* Ensure link button has no underline */
+    text-decoration: none;
 }}
 .animated-button-container .stButton>button:hover, .st-emotion-cache-19n6j20 a:hover {{
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
 }}
 
 /* --- Custom Footer Styling (FIXED) --- */
 .custom-footer-box {{
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.6);
     padding: 30px;
     border-radius: 15px;
     border: 1px solid #00c6ff;
     margin-top: 4rem;
-    overflow: auto; /* THIS IS THE FIX */
+    overflow: auto;
 }}
 .custom-footer-box h4 {{
-    color: #fff !important;
     margin-bottom: 10px;
 }}
-.custom-footer-box p, .custom-footer-box a {{
-    color: #ccc !important;
-    font-size: 16px;
-}}
 .custom-footer-box a {{
-    color: #00c6ff !important;
+    color: #007acc !important;
     text-decoration: none;
 }}
 .custom-footer-box img {{
@@ -142,7 +138,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 }}
 </style>
 """, unsafe_allow_html=True)
-
 
 # =============================
 # 💬 WELCOME SECTION
@@ -157,11 +152,11 @@ with st.container():
     with col2:
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown(
-            "<h1 style='text-align: center; color: #fff; font-family: sans-serif; font-weight: 800; font-size: 3.5rem;'>NeuroSeg</h1>",
+            "<h1 style='text-align: center; font-family: sans-serif; font-weight: 800; font-size: 3.5rem;'>NeuroSeg</h1>",
             unsafe_allow_html=True
         )
         st.markdown(
-            "<p style='text-align: center; color:#ccc; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
+            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
             unsafe_allow_html=True
         )
 
@@ -177,7 +172,6 @@ with col1:
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE"
 
-    # Applying animation to st.link_button
     st.markdown(f'<div class="animated-button-container">{st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)}</div>', unsafe_allow_html=True)
 
     st.markdown("---")
@@ -206,7 +200,6 @@ with col2:
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Applying animation to st.button
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation", use_container_width=True):
         with st.spinner('Analyzing the image...'):
@@ -218,7 +211,6 @@ if model_loaded and image_file:
 # =============================
 # 🎓 ABOUT & CREDITS FOOTER
 # =============================
-# This div will now correctly wrap the content inside
 st.markdown('<div class="custom-footer-box">', unsafe_allow_html=True)
 
 logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"
