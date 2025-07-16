@@ -5,7 +5,84 @@ import tensorflow as tf
 import streamlit.components.v1 as com
 
 # =============================
-# 📦 UTILITY FUNCTIONS
+# 📆 PAGE CONFIG
+# =============================
+st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
+
+# =============================
+# 🌟 TOP BAR (Logo, Search, About)
+# =============================
+st.markdown(f"""
+<style>
+.topbar {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    margin-bottom: 10px;
+}}
+
+.topbar-logo {{
+    height: 45px;
+}}
+
+.topbar-search {{
+    flex-grow: 1;
+    margin: 0 20px;
+}}
+
+.topbar-search input {{
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 2px solid #005c97;
+    border-radius: 8px;
+}}
+
+.topbar-about {{
+    padding: 8px 18px;
+    background: linear-gradient(45deg, #005c97, #363795);
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+}}
+</style>
+
+<div class="topbar">
+    <img class="topbar-logo" src="https://upload.wikimedia.org/wikipedia/fr/thumb/7/76/Université_Cadi_Ayyad.svg/1200px-Université_Cadi_Ayyad.svg.png">
+    <div class="topbar-search">
+        <input type="text" placeholder="🔍 Research..." />
+    </div>
+    <a href="#about-section" class="topbar-about">About</a>
+</div>
+""", unsafe_allow_html=True)
+
+# =============================
+# 📚 HEADER TITLE SECTION
+# =============================
+with st.container():
+    col1, col2 = st.columns([1, 2], gap="large")
+    with col1:
+        com.iframe(
+            "https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie",
+            height=400
+        )
+    with col2:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown(
+            "<h1 style='text-align: center; font-family: sans-serif; font-weight: 800; font-size: 3.5rem;'>NeuroSeg</h1>",
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
+            unsafe_allow_html=True
+        )
+
+# =============================
+# 🚀 MAIN APPLICATION
 # =============================
 
 def preprocess_image(image_file, target_size=(128, 128)):
@@ -35,109 +112,6 @@ def display_prediction(image_pil, mask):
     with col2:
         st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
 
-# =============================
-# 🔧 PAGE CONFIG
-# =============================
-st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
-
-# =============================
-# 🎨 STYLE FOR TOP BAR + TITLE
-# =============================
-logo_url = "https://upload.wikimedia.org/wikipedia/fr/thumb/7/76/Université_Cadi_Ayyad.svg/1200px-Université_Cadi_Ayyad.svg.png"  # Replace if you want a different logo
-
-st.markdown(f"""
-<style>
-.stApp {{
-    background-image: url("https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg");
-    background-size: cover;
-    background-attachment: fixed;
-}}
-
-.top-header {{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 30px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 16px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}}
-
-.logo {{
-    height: 60px;
-}}
-
-.title {{
-    font-family: 'Roboto', sans-serif;
-    font-size: 3.8rem;
-    font-weight: 900;
-    text-align: center;
-    animation: glowBounce 2.5s ease-in-out infinite;
-    margin: 0;
-}}
-
-@keyframes glowBounce {{
-    0%, 100% {{
-        color: #005c97;
-        text-shadow: 0 0 5px #7997e8, 0 0 10px #7997e8;
-    }}
-    50% {{
-        color: #f6d3ff;
-        text-shadow: 0 0 20px #f6d3ff, 0 0 30px #7997e8;
-    }}
-}}
-
-.search-input {{
-    padding: 10px 15px;
-    font-size: 16px;
-    border: 2px solid #363795;
-    border-radius: 8px;
-    width: 220px;
-}}
-
-.about-btn {{
-    margin-left: 15px;
-    padding: 10px 18px;
-    background: linear-gradient(45deg, #005c97, #363795);
-    color: white;
-    font-weight: bold;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: 0.3s ease;
-}}
-.about-btn:hover {{
-    background: #005c97;
-}}
-</style>
-
-<!-- 🎯 FIXED TOP HEADER -->
-<div class="top-header">
-    <img src="{logo_url}" class="logo">
-    <h1 class="title">NeuroSeg</h1>
-    <div style="display: flex; align-items: center;">
-        <input class="search-input" placeholder="🔍 Search..." />
-        <a href="#about-section" class="about-btn">About</a>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# =============================
-# 🧠 LOTTIE SECTION
-# =============================
-with st.container():
-    col1, col2 = st.columns([1, 2], gap="large")
-    with col1:
-        com.iframe("https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie", height=400)
-    with col2:
-        st.markdown(
-            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
-            unsafe_allow_html=True
-        )
-
-# =============================
-# 🚀 MAIN APP
-# =============================
 st.markdown("<br><hr><br>", unsafe_allow_html=True)
 col1, col2 = st.columns(2, gap="large")
 
@@ -174,10 +148,10 @@ if model_loaded and image_file:
             display_prediction(img_pil, pred_mask)
 
 # =============================
-# 🧾 ABOUT SECTION
+# 📄 ABOUT SECTION (ANCHOR)
 # =============================
 st.markdown('<br><br><hr><br>', unsafe_allow_html=True)
-st.markdown('<h2 id="about-section">👩‍⚕️ About the Project</h2>', unsafe_allow_html=True)
+st.markdown('<h2 id="about-section">👩‍💼 About the Project</h2>', unsafe_allow_html=True)
 
 st.markdown("""
 <style>
