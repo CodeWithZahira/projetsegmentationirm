@@ -211,25 +211,86 @@ if model_loaded and image_file:
 # =============================
 # 🎓 ABOUT & CREDITS FOOTER
 # =============================
-st.markdown('</div>', unsafe_allow_html=True)
 
-logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"
+st.markdown("""
+<style>
+.booking-style-footer {
+    background-color: #f9f9f9;
+    padding: 50px 30px 20px 30px;
+    font-family: sans-serif;
+    border-top: 1px solid #ddd;
+    color: black;
+}
+.booking-style-footer h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.booking-style-footer p, .booking-style-footer a {
+    font-size: 15px;
+    color: black;
+    text-decoration: none;
+    margin: 4px 0;
+}
+.footer-columns {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 50px;
+}
+.footer-column {
+    flex: 1;
+    min-width: 200px;
+}
+.footer-bottom {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+</style>
 
-f_col1, f_col2 = st.columns([1, 2])
-with f_col1:
-    st.markdown(f'<div style="text-align: center;"><img src="{logo_url}" width="150"></div>', unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Cadi Ayyad University<br>Faculties of Medicine and Pharmacie</p>", unsafe_allow_html=True)
-with f_col2:
-    st.markdown(
-        """
-        <div>
-            <h4>Developed By</h4>
-            <p>ELLAOUAH ZAHIRA | <a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
-            <h4>Under the Supervision of</h4>
-            <p>Pr. Nezha Oumghar      Pr. Mohamed Amine Chadi</p>
+<div class="booking-style-footer">
+    <div class="footer-columns">
+        <div class="footer-column">
+            <h4>Développé par</h4>
+            <p>Zahira ELLAOUAH</p>
+            <p><a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <div class="footer-column">
+            <h4>Encadré par</h4>
+            <p>Pr. Nezha Oumghar</p>
+            <p>Pr. Mohamed Amine Chadi</p>
+        </div>
+        <div class="footer-column">
+            <h4>Université</h4>
+            <p>Université Cadi Ayyad</p>
+            <p>Faculté de Médecine et de Pharmacie</p>
+            <p>Marrakech</p>
+        </div>
+        <div class="footer-column">
+            <h4>Projet</h4>
+            <p>Segmentation automatique des IRM</p>
+            <p>Master en Ingénierie Biomédicale</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 Zahira Ellaouah – Tous droits réservés</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
+
+
+
+
+
+
+
+
+
+
+
+
