@@ -44,16 +44,16 @@ st.markdown("""
 <style>
 .neuroseg-title {
     font-family: 'Roboto', sans-serif;
-    font-size: 3.5rem;
+    font-size: 4rem;
     font-weight: 800;
     text-align: center;
     margin: 0;
     padding: 20px 0;
-    background: linear-gradient(90deg, #005c97, #363795, #005c97);
-    background-size: 300% 300%;
+    background: linear-gradient(270deg, #005c97, #363795, #005c97);
+    background-size: 600% 600%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: gradientSlide 5s ease infinite;
+    animation: gradientSlide 8s ease infinite;
 }
 
 @keyframes gradientSlide {
