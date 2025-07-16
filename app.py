@@ -194,7 +194,7 @@ if model_loaded and image_file:
 # --- Applying the new footer container class ---
 st.markdown('<div class="footer-container">', unsafe_allow_html=True)
 
-logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/MIT_logo.svg/1200px-MIT_logo.svg.png"
+logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"
 
 f_col1, f_col2 = st.columns([1, 2])
 with f_col1:
@@ -205,9 +205,9 @@ with f_col2:
         """
         <div class="footer">
             <h4>Developed By</h4>
-            <p>👤 [Your Name Here] | <a href="mailto:[your.email@university.edu]">📧 [your.email@university.edu]</a></p>
+            <p> ELLAOUAH ZAHIRA | <a href="mailto: zahiraellaouah@gmail.com">📧 [zahiraellaouah@gmail.com]</a></p>
             <h4>Under the Supervision of</h4>
-            <p>👨‍🏫 [Professor 1 Name]     👨‍🏫 [Professor 2 Name]</p>
+            <p>Pr. Nezha Oumghar  Pr. Mohamed Amine Chadi</p>
         </div>
         """,
         unsafe_allow_html=True
