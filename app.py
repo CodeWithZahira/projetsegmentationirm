@@ -10,6 +10,130 @@ import io
 # =============================
 st.set_page_config(page_title="NeuroSeg Base", layout="centered")
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+}
+.codigo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #272822;
+  color: #F8F8F2;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  padding: 20px;
+  border-radius: 8px;
+  white-space: pre-line;
+  text-align: left;
+  line-height: 1.6;
+  max-height: 50%;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+} 
+.selector       { color: #F92672; } 
+.property       { color: #66D9EF; } 
+.value-number   { color: #AE81FF; } 
+.value-string   { color: #E6DB74; } 
+.value-color    { color: #A6E22E; } 
+.brace          { color: #F8F8F2; } 
+.comment        { color: #75715E; } 
+.function       { color: #A6E22E; } 
+
+.animation-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.box{
+  width: 100px;
+  height: 100px;
+  background-color: #fff;
+  position: relative;
+}
+
+.box:nth-child(1) {
+  animation: box1 2s infinite;
+}
+
+.box:nth-child(2) {
+  animation: box2 2s infinite;
+}
+
+.box:nth-child(3) {
+  animation: box3 2s infinite;
+}
+
+@keyframes box1 {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(50px, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(0,0);
+    opacity: 1;
+  }
+}
+
+@keyframes box2 {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(0, 50px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes box3 {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+    rotate: 0deg;
+  }
+  50% {
+    transform: translate(0, 0);
+    opacity: 0.5;
+    rotate: 360deg;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+    rotate: 0deg;
+  }
+}                                         
+            
+
+
+
 # =============================
 # 📦 UTILITIES
 # =============================
