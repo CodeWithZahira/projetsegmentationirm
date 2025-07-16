@@ -4,11 +4,14 @@ from PIL import Image
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import io
-
+import streamlit.components.v1 as com
 # =============================
 # 🔧 PAGE CONFIG
 # =============================
 st.set_page_config(page_title="NeuroSeg Base", layout="centered")
+com.iframe("https://lottie.host/embed/f18f3de4-bd26-4c40-a8e8-4d57c67b5142/sQWEZtzUW3.lottie")
+
+
 
 # =============================
 # 📦 UTILITIES
