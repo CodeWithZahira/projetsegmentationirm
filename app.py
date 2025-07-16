@@ -6,15 +6,18 @@ import streamlit.components.v1 as com
 import cv2
 import tempfile
 import os
+from io import BytesIO
+from fpdf import FPDF  # pip install fpdf
 
 # =============================
 # 📦 UTILITY FUNCTIONS
 # =============================
-def preprocess_image(image_input, target_size=(128, 128)):
-    if isinstance(image_input, Image.Image):
-        image = image_input.convert("L")
+def preprocess_image(image_file, target_size=(128, 128)):
+    # image_file can be a file-like object or PIL Image
+    if isinstance(image_file, Image.Image):
+        image = image_file.convert("L")
     else:
-        image = Image.open(image_input).convert("L")
+        image = Image.open(image_file).convert("L")
     image = image.resize(target_size)
     img_array = np.array(image) / 255.0
     img_array = img_array.astype(np.float32)
@@ -60,6 +63,40 @@ def extract_frames_from_video(video_file, max_frames=30):
     os.remove(tmp_file_path)
     return frames
 
+def get_image_download_link(pil_img, filename="mask.png"):
+    buffered = BytesIO()
+    pil_img.save(buffered, format="PNG")
+    img_bytes = buffered.getvalue()
+    return st.download_button(
+        label="📥 Download Mask as PNG",
+        data=img_bytes,
+        file_name=filename,
+        mime="image/png"
+    )
+
+def get_pdf_download_link(pil_img, filename="mask.pdf"):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf_w, pdf_h = pdf.w - 2*pdf.l_margin, pdf.h - 2*pdf.t_margin
+    pil_img = pil_img.convert("RGB")
+    buffered = BytesIO()
+    pil_img.save(buffered, format="JPEG")
+    img_data = buffered.getvalue()
+    # Save image temporarily so FPDF can add it
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img_file:
+        tmp_img_file.write(img_data)
+        tmp_img_file_path = tmp_img_file.name
+    pdf.image(tmp_img_file_path, x=pdf.l_margin, y=pdf.t_margin, w=pdf_w)
+    pdf_output = pdf.output(dest="S").encode("latin1")
+    os.remove(tmp_img_file_path)
+    return st.download_button(
+        label="📥 Download Mask as PDF",
+        data=pdf_output,
+        file_name=filename,
+        mime="application/pdf"
+    )
+
+
 # =============================
 # 🔧 PAGE CONFIG
 # =============================
@@ -92,7 +129,7 @@ st.markdown(f"""
     z-index: -1;
 }}
 
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button {{
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
     color: black !important;
 }}
 
@@ -226,7 +263,7 @@ with col1:
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
     image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
-    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
+    video_file = st.file_uploader("Or upload an MRI Video (mp4, avi)", type=["mp4", "avi"], label_visibility="collapsed")
 
     all_images = []
     if image_files:
@@ -246,11 +283,16 @@ if model_loaded and all_images:
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation for All Inputs", use_container_width=True):
         for idx, item in enumerate(all_images):
-            with st.spinner(f"Analyzing image {idx + 1}..."):
+            with st.spinner(f"Analyzing input {idx + 1}..."):
                 try:
                     img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
                     display_prediction(img_pil, pred_mask)
+
+                    mask_pil = Image.fromarray(pred_mask)
+                    get_image_download_link(mask_pil, filename=f"mask_{idx+1}.png")
+                    get_pdf_download_link(mask_pil, filename=f"mask_{idx+1}.pdf")
+
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
