@@ -11,6 +11,7 @@ import streamlit.components.v1 as com
 # =============================
 
 def preprocess_image(image_file, target_size=(128, 128)):
+    # This function now correctly takes the file object
     image = Image.open(image_file).convert("L")
     image = image.resize(target_size)
     img_array = np.array(image) / 255.0
@@ -43,17 +44,19 @@ def display_prediction(image_pil, mask):
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 🎨 STYLING & ASSETS
+# 🎨 STYLING & ASSETS (Consolidated)
 # =============================
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
 <style>
+/* CSS Variable for Animation */
 @property --a {{
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }}
 
+/* General App and Font Styling */
 .stApp {{
     background-image: url("{image_url}");
     background-size: cover;
@@ -68,11 +71,11 @@ st.markdown(f"""
     background: linear-gradient(45deg, rgba(15, 32, 39, 0.9), rgba(32, 58, 67, 0.9), rgba(44, 83, 100, 0.9));
     z-index: -1;
 }}
-
 h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
     color: #FFFFFF !important;
 }}
 
+/* Animated Button Styling */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -92,17 +95,13 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
     filter: blur(0.25em);
     animation: rotateGlow 4s linear infinite;
 }}
-
 @keyframes rotateGlow {{
-  to {{
-    --a: 1turn;
-  }}
+  to {{ --a: 1turn; }}
 }}
-
 .animated-button-container .stButton>button, .animated-button-container .stLinkButton>a {{
     width: 100%;
     background: linear-gradient(45deg, #005c97, #363795);
-    color: white;
+    color: white !important;
     border-radius: 50px;
     padding: 15px 30px;
     font-size: 18px;
@@ -116,21 +115,30 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
-.footer-container {{
-    background: rgba(15, 32, 39, 0.8);
-    padding: 2rem;
-    border-radius: 10px;
+/* --- Your Custom Footer Styling (Integrated Here) --- */
+.custom-footer-box {{
+    background: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #00c6ff;
     margin-top: 4rem;
-    border-top: 1px solid #00c6ff;
 }}
-.footer-container .footer {{
-    color: #ccc;
-    text-align: center;
+.custom-footer-box h4 {{
+    color: #fff !important; /* Added !important for emphasis */
+    margin-bottom: 10px;
 }}
-.footer-container .footer a {{
-    color: #00c6ff;
+.custom-footer-box p, .custom-footer-box a {{
+    color: #ccc !important; /* Added !important for emphasis */
+    font-size: 16px;
+}}
+.custom-footer-box a {{
+    color: #00c6ff !important;
     text-decoration: none;
 }}
+.custom-footer-box img {{
+    border-radius: 8px; /* Optional: adds rounded corners to the logo */
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -167,7 +175,8 @@ with col1:
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE"
     
-    st.markdown(f'<div class="animated-button-container"><a href="{model_download_url}" target="_blank" class="stLinkButton" style="display: block; text-decoration: none; color: white; padding: 15px 30px; border-radius: 50px; background: linear-gradient(45deg, #005c97, #363795);">⬇️ Download the Model (.tflite)</a></div>', unsafe_allow_html=True)
+    # Use st.link_button for a more robust button
+    st.link_button("⬇️ Download the Model (.tflite)", model_download_url)
     
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
@@ -194,44 +203,18 @@ with col2:
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
+    
+    # Using a standard button here
     if st.button("🔍 Perform Segmentation"):
         with st.spinner('Analyzing the image...'):
             img_array, img_pil = preprocess_image(image_file)
             pred_mask = tflite_predict(interpreter, img_array)
             display_prediction(img_pil, pred_mask)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
 # 🎓 ABOUT & CREDITS FOOTER
 # =============================
-# =============================
-# 🎓 ABOUT & CREDITS FOOTER
-# =============================
-st.markdown("""
-<style>
-.custom-footer-box {
-    background: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
-    padding: 30px;
-    border-radius: 15px;
-    border: 1px solid #00c6ff;
-    margin-top: 4rem;
-}
-.custom-footer-box h4 {
-    color: #fff;
-    margin-bottom: 10px;
-}
-.custom-footer-box p, .custom-footer-box a {
-    color: #ccc;
-    font-size: 16px;
-}
-.custom-footer-box a {
-    color: #00c6ff;
-    text-decoration: none;
-}
-</style>
-""", unsafe_allow_html=True)
-
+# The custom div class will style this entire section
 st.markdown('<div class="custom-footer-box">', unsafe_allow_html=True)
 
 logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"
@@ -245,9 +228,9 @@ with f_col2:
         """
         <div>
             <h4>Developed By</h4>
-            <p>ELLAOUAH ZAHIRA | <a href="mailto:zahiraellaouah@gmail.com">📧 zahiraellaouah@gmail.com</a></p>
+            <p>ELLAOUAH ZAHIRA | <a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
             <h4>Under the Supervision of</h4>
-            <p>Pr. Nezha Oumghar &nbsp;&nbsp;&nbsp;&nbsp; Pr. Mohamed Amine Chadi</p>
+            <p>Pr. Nezha Oumghar      Pr. Mohamed Amine Chadi</p>
         </div>
         """,
         unsafe_allow_html=True
