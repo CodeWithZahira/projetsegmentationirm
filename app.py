@@ -70,8 +70,8 @@ st.markdown(f"""
     background: linear-gradient(45deg, rgba(15, 32, 39, 0.9), rgba(32, 58, 67, 0.9), rgba(44, 83, 100, 0.9));
     z-index: -1;
 }}
-h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
-    color: #FFFFFF !important;
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj, .custom-footer-box, .custom-footer-box * {
+    color: black !important;
 }}
 
 /* Animated Button Styling */
