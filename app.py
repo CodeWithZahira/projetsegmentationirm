@@ -41,7 +41,7 @@ def display_prediction(image_pil, mask):
     with col1:
         st.image(image_pil, caption="Original MRI Scan", use_container_width=True)
     with col2:
-        st.image(mask, caption="Predicted/Uploaded Segmentation Mask", use_container_width=True)
+        st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
@@ -64,14 +64,19 @@ def extract_frames_from_video(video_file, max_frames=30):
     return frames
 
 def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
+    # Convert mask array to PIL Image (grayscale)
     mask_pil = Image.fromarray(mask).convert("L")
+    # Resize mask to original image size (if needed)
     mask_pil = mask_pil.resize(original.size)
+    # Create a new image wide enough to hold both side by side
     combined_width = original.width + mask_pil.width
     combined_height = max(original.height, mask_pil.height)
     combined_img = Image.new("RGB", (combined_width, combined_height))
+    # Convert original grayscale to RGB
     original_rgb = original.convert("RGB")
     combined_img.paste(original_rgb, (0, 0))
     combined_img.paste(mask_pil.convert("RGB"), (original.width, 0))
+    # Add labels
     draw = ImageDraw.Draw(combined_img)
     font = ImageFont.load_default()
     draw.text((10, 10), "MRI Scan", fill="red", font=font)
@@ -280,105 +285,42 @@ with col1:
             st.error(f"❌ Error loading model: {e}")
 
 with col2:
-    st.header("2. Upload MRI Images / Video and Masks")
+    st.header("2. Upload MRI Image(s) or Video")
+    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
+    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
 
-    image_files = st.file_uploader(
-        "Upload MRI Images",
-        type=["png", "jpg", "jpeg", "tif", "tiff"],
-        accept_multiple_files=True,
-        label_visibility="collapsed"
-    )
-    video_file = st.file_uploader(
-        "Or upload an MRI Video (mp4 or avi)",
-        type=["mp4", "avi"],
-        label_visibility="collapsed"
-    )
-
-    st.markdown("---")
-
-    # Option: Upload individual masks corresponding to each image (optional)
-    st.markdown("**Optional:** Upload mask images corresponding to each MRI image (1-to-1 matching order):")
-    mask_files = st.file_uploader(
-        "Upload mask images (optional)",
-        type=["png", "jpg", "jpeg", "tif", "tiff"],
-        accept_multiple_files=True,
-        label_visibility="collapsed"
-    )
-
-    st.markdown("---")
-
-    # Option: Upload all masks at once (batch)
-    st.markdown("**Or** upload all masks at once (batch), matched by order with the images:")
-    batch_mask_files = st.file_uploader(
-        "Upload all masks (batch)",
-        type=["zip"],
-        label_visibility="collapsed"
-    )
-    # (For simplicity, the batch mask upload feature could be enhanced later to extract zip contents)
-
-    # For now, we will not implement batch zip extraction in this example.
-    # So, let's just rely on individual masks or no masks.
-
-    # Prepare images list from image files + video frames
     all_images = []
     if image_files:
         for file in image_files:
+            st.image(file, caption=file.name, use_container_width=True)
             all_images.append(file)
 
     if video_file:
         with st.spinner("Extracting frames from video..."):
             frames = extract_frames_from_video(video_file)
-            all_images.extend(frames)
-
-# =============================
-# Perform segmentation or show masks side by side
-# =============================
+            for i, frame in enumerate(frames):
+                st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
+                all_images.append(frame)
 
 if model_loaded and all_images:
-
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
-    if st.button("🔍 Process All Images", use_container_width=True):
+    if st.button("🔍 Perform Segmentation for All Inputs", use_container_width=True):
+        for idx, item in enumerate(all_images):
+            with st.spinner(f"Analyzing input {idx + 1}..."):
+                try:
+                    if isinstance(item, Image.Image):
+                        img_array, img_pil = preprocess_image(item)
+                    else:
+                        img_array, img_pil = preprocess_image(item)
+                    pred_mask = tflite_predict(interpreter, img_array)
+                    display_prediction(img_pil, pred_mask)
 
-        # If user uploaded masks equal to images count, use them
-        use_uploaded_masks = False
-        if mask_files and len(mask_files) == len(all_images):
-            use_uploaded_masks = True
-            st.info("Using user-uploaded masks for display.")
+                    # Combined download links
+                    get_combined_download_links(img_pil, pred_mask, idx)
 
-        for idx, img_file in enumerate(all_images):
-            with st.spinner(f"Processing image {idx + 1}..."):
-
-                # Load original image PIL
-                if isinstance(img_file, Image.Image):
-                    img_pil = img_file
-                    img_array, _ = preprocess_image(img_pil)
-                else:
-                    img_array, img_pil = preprocess_image(img_file)
-
-                if use_uploaded_masks:
-                    try:
-                        mask_file = mask_files[idx]
-                        mask_pil = Image.open(mask_file).convert("L")
-                        mask_resized = mask_pil.resize(img_pil.size)
-                        mask = np.array(mask_resized)
-                        # Ensure binary mask 0/255
-                        mask = ((mask > 128) * 255).astype(np.uint8)
-                    except Exception as e:
-                        st.error(f"❌ Error loading mask for image {idx+1}: {e}")
-                        mask = None
-                else:
-                    try:
-                        mask = tflite_predict(interpreter, img_array)
-                    except Exception as e:
-                        st.error(f"❌ Error predicting mask for image {idx+1}: {e}")
-                        mask = None
-
-                if mask is not None:
-                    combined_img = combine_images(img_pil, mask)
-                    st.image(combined_img, caption=f"Image {idx+1} and its Mask", use_container_width=True)
-                    get_combined_download_links(img_pil, mask, idx)
-
+                except Exception as e:
+                    st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
