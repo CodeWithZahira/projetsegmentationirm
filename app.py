@@ -41,19 +41,15 @@ def display_prediction(image_pil, mask):
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 🎨 STYLING & BACKGROUND + TITLE ANIMATION
+# 🎨 CSS STYLING + ANIMATED TITLE
 # =============================
-image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
+logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"  
+
 st.markdown(f"""
 <style>
-@property --a {{
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}}
-
+/* Background */
 .stApp {{
-    background-image: url("{image_url}");
+    background-image: url("https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -67,123 +63,100 @@ st.markdown(f"""
     z-index: -1;
 }}
 
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
-    color: black !important;
+/* Top Bar Layout */
+.top-bar {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 30px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    margin-bottom: 20px;
 }}
 
-/* Animated Button */
-.animated-button-container {{
-    position: relative;
-    display: inline-block;
-    padding: 3px;
-    border-radius: 50px;
-    overflow: hidden;
-    width: 100%;
-    text-align: center;
-}}
-.animated-button-container::before {{
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: -0.5em;
-    border: solid 0.25em;
-    border-image: conic-gradient(from var(--a), #7997e8, #f6d3ff, #7997e8) 1;
-    filter: blur(0.25em);
-    animation: rotateGlow 4s linear infinite;
-}}
-@keyframes rotateGlow {{
-  to {{ --a: 1turn; }}
-}}
-.animated-button-container .stButton>button {{
-    width: 100%;
-    background: linear-gradient(45deg, #005c97, #363795);
-    color: black !important;
-    border-radius: 50px;
-    padding: 15px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}}
-.animated-button-container .stButton>button:hover {{
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}}
-
-/* 🔥 BIG Attention-Grabbing Title Animation */
-@keyframes glowBounce {{
-  0%, 100% {{
-    color: #005c97;
-    text-shadow:
-      0 0 5px #7997e8,
-      0 0 10px #7997e8,
-      0 0 20px #7997e8,
-      0 0 40px #f6d3ff,
-      0 0 80px #f6d3ff;
-    transform: translateY(0) scale(1);
-  }}
-  50% {{
-    color: #f6d3ff;
-    text-shadow:
-      0 0 10px #f6d3ff,
-      0 0 20px #f6d3ff,
-      0 0 30px #f6d3ff,
-      0 0 60px #7997e8,
-      0 0 90px #7997e8;
-    transform: translateY(-20px) scale(1.15);
-  }}
+.logo {{
+    height: 60px;
 }}
 
 .animated-title {{
   font-family: 'Roboto', sans-serif;
   font-weight: 900;
-  font-size: 5rem;
-  text-align: center;
+  font-size: 3.2rem;
   animation: glowBounce 2.5s ease-in-out infinite;
   user-select: none;
-  margin-bottom: 0.5rem;
-  cursor: default;
+  margin: 0;
 }}
+
+@keyframes glowBounce {{
+  0%, 100% {{
+    color: #005c97;
+    text-shadow: 0 0 5px #7997e8, 0 0 10px #7997e8, 0 0 20px #7997e8;
+    transform: scale(1);
+  }}
+  50% {{
+    color: #f6d3ff;
+    text-shadow: 0 0 10px #f6d3ff, 0 0 30px #f6d3ff, 0 0 60px #7997e8;
+    transform: scale(1.1);
+  }}
+}}
+
+/* Button */
+.about-button {{
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #005c97, #363795);
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+}}
+
+/* Search box */
+.search-box {{
+    padding: 8px;
+    border-radius: 10px;
+    width: 300px;
+    border: 2px solid #363795;
+    font-size: 16px;
+}}
+
 </style>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+    <img src="{logo_url}" class="logo">
+    <h1 class="animated-title">NeuroSeg</h1>
+    <div style="display: flex; gap: 15px;">
+        <input class="search-box" placeholder="🔍 Search..." />
+        <a href="#about-section" class="about-button">About</a>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 # =============================
-# 💬 WELCOME SECTION
+# 💬 INTRO + LOTTIE ANIMATION
 # =============================
 with st.container():
     col1, col2 = st.columns([1, 2], gap="large")
     with col1:
-        com.iframe(
-            "https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie",
-            height=400
-        )
+        com.iframe("https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie", height=400)
     with col2:
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        st.markdown('<h1 class="animated-title">NeuroSeg</h1>', unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
             "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
             unsafe_allow_html=True
         )
 
 # =============================
-# 🚀 MAIN APPLICATION
+# 🚀 MAIN FUNCTIONALITY
 # =============================
 st.markdown("<br><hr><br>", unsafe_allow_html=True)
-
 col1, col2 = st.columns(2, gap="large")
 
 with col1:
     st.header("1. Get & Upload Model")
-    st.markdown("First, download the pre-trained model file.")
+    st.markdown("Download the pre-trained model file:")
     model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
-
-    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
-    st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("---")
-    st.markdown("Then, upload the downloaded file here:")
+    st.link_button("⬇️ Download Model (.tflite)", model_download_url, use_container_width=True)
     model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
 
     interpreter = None
@@ -200,24 +173,24 @@ with col1:
 
 with col2:
     st.header("2. Upload Image")
-    st.markdown("Now, upload an MRI scan to perform segmentation.")
-    image_file = st.file_uploader("Upload image", type=["png", "jpg", "jpeg", "tif", "tiff"], label_visibility="collapsed")
+    image_file = st.file_uploader("Upload MRI scan", type=["png", "jpg", "jpeg", "tif", "tiff"], label_visibility="collapsed")
     if image_file:
         st.image(image_file, caption="Uploaded MRI Scan", use_container_width=True)
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation", use_container_width=True):
         with st.spinner('Analyzing the image...'):
             img_array, img_pil = preprocess_image(image_file)
             pred_mask = tflite_predict(interpreter, img_array)
             display_prediction(img_pil, pred_mask)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
-# 🎓 FOOTER
+# 🔗 ABOUT SECTION (ANCHOR)
 # =============================
+st.markdown('<br><br><hr><br>', unsafe_allow_html=True)
+st.markdown('<h2 id="about-section">👩‍⚕️ About the Project</h2>', unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 .booking-style-footer {
@@ -278,8 +251,8 @@ st.markdown("""
         </div>
         <div class="footer-column">
             <h4>Project</h4>
-            <p>Automatic Segmentation of Brain MRIs by Convolutional Neural Network U-Net</p>
-            <p>Master's in biomedical instrumentation and analysis</p>
+            <p>Automatic Segmentation of Brain MRIs by CNN U-Net</p>
+            <p>Master's in Biomedical Instrumentation and Analysis</p>
         </div>
     </div>
     <div class="footer-bottom">
