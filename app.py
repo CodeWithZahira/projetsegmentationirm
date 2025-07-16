@@ -36,9 +36,10 @@ def tflite_predict(interpreter, input_data):
     return prediction
 
 def overlay_mask_on_image(image_pil, mask, color=(255, 0, 0), alpha=0.4):
-    # Redimensionner l'image originale à la taille du masque
-    image_resized = image_pil.resize((mask.shape[1], mask.shape[0]), resample=Image.BILINEAR)
-    
+    # Redimensionner l'image à la taille du masque (largeur, hauteur)
+    target_size = (mask.shape[1], mask.shape[0])
+    image_resized = image_pil.resize(target_size, resample=Image.BILINEAR)
+
     image_np = np.array(image_resized.convert("RGB"))
     mask_rgb = np.zeros_like(image_np)
     mask_rgb[mask == 255] = color
@@ -135,7 +136,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     color: black !important;
 }}
 
-/* Animated Button */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -175,7 +175,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
-/* 🔥 BIG Attention-Grabbing Title Animation */
 @keyframes glowBounce {{
   0%, 100% {{
     color: #005c97;
@@ -235,21 +234,11 @@ with st.container():
 # 🚀 MAIN APPLICATION
 # =============================
 
-col1, col2 = st.columns(2, gap="large")
+col1, col2 = st.columns(2)
 
 with col1:
-    st.header("1. Get & Upload Model")
-    st.markdown("First, download the pre-trained model file.")
-    model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
-
-    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
-    st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("---")
-    st.markdown("Then, upload the downloaded file here:")
-    model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
-
+    st.header("1. Upload Model")
+    model_file = st.file_uploader("Upload your TFLite model", type=["tflite"])
     interpreter = None
     model_loaded = False
     if model_file:
@@ -264,29 +253,33 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
-    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
+    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True)
+    video_file = st.file_uploader("Or upload a video (mp4 or avi)", type=["mp4", "avi"])
 
-    all_images = []
-    if image_files:
-        for file in image_files:
-            st.image(file, caption=file.name, use_container_width=True)
-            all_images.append(file)
+all_images = []
+if image_files:
+    for file in image_files:
+        st.image(file, caption=file.name, use_container_width=True)
+        all_images.append(file)
 
-    if video_file:
-        with st.spinner("Extracting frames from video..."):
-            frames = extract_frames_from_video(video_file)
-            for i, frame in enumerate(frames):
-                st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
-                all_images.append(frame)
+if video_file:
+    with st.spinner("Extracting frames from video..."):
+        frames = extract_frames_from_video(video_file)
+        for i, frame in enumerate(frames):
+            st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
+            all_images.append(frame)
+
+# =============================
+# 🔍 Perform Segmentation
+# =============================
 
 if model_loaded and all_images:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
-    if st.button("🔍 Perform Segmentation for All Inputs", use_container_width=True):
+    if st.button("🔍 Perform Segmentation", use_container_width=True):
         all_results = []
         for idx, item in enumerate(all_images):
-            with st.spinner(f"Analyzing input {idx + 1}..."):
+            with st.spinner(f"Processing input {idx + 1}..."):
                 try:
                     if isinstance(item, Image.Image):
                         img_array, img_pil = preprocess_image(item)
@@ -296,16 +289,20 @@ if model_loaded and all_images:
 
                     overlay_img = overlay_mask_on_image(img_pil, pred_mask)
 
-                    # Display
-                    st.image(overlay_img, caption=f"Overlay MRI + Mask {idx+1}", use_container_width=True)
+                    # Afficher taille pour debug
+                    st.write(f"Original image size: {img_pil.size}")
+                    st.write(f"Mask size: {(pred_mask.shape[1], pred_mask.shape[0])}")
 
-                    # Add for batch download
+                    # Affichage de l'image superposée
+                    st.image(overlay_img, caption=f"Overlay MRI + Mask {idx+1} (resized)", use_container_width=False)
+
+                    # Ajouter pour téléchargement batch
                     all_results.append((img_pil, pred_mask, overlay_img))
 
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
 
-        # Add ZIP download button
+        # Bouton de téléchargement ZIP
         generate_combined_downloads(all_results)
 
     st.markdown('</div>', unsafe_allow_html=True)
