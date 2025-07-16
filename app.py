@@ -267,6 +267,10 @@ if model_loaded and all_images:
 # =============================
 # 🎓 FOOTER
 # =============================
+
+# =============================
+# 🎓 FOOTER
+# =============================
 st.markdown("""
 <style>
 .booking-style-footer {
@@ -313,4 +317,30 @@ st.markdown("""
             <h4>Developed By</h4>
             <p>Zahira ELLAOUAH</p>
             <p><a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
-        </
+        </div>
+        <div class="footer-column">
+            <h4>Supervised By</h4>
+            <p>Pr. Nezha Oumghar</p>
+            <p>Pr. Mohamed Amine Chadi</p>
+        </div>
+        <div class="footer-column">
+            <h4>University</h4>
+            <p>Cadi Ayyad University</p>
+            <p>Faculty of Medicine and Pharmacy</p>
+            <p>Marrakesh</p>
+        </div>
+        <div class="footer-column">
+            <h4>Project</h4>
+            <p>Automatic Segmentation of Brain MRIs by Convolutional Neural Network U-Net</p>
+            <p>Master's in biomedical instrumentation and analysis</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 Zahira Ellaouah – All rights reserved</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+
+
+
