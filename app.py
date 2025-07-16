@@ -41,122 +41,110 @@ def display_prediction(image_pil, mask):
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 🎨 CSS STYLING + ANIMATED TITLE
+# 🎨 STYLE FOR TOP BAR + TITLE
 # =============================
-logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"  
+logo_url = "https://upload.wikimedia.org/wikipedia/fr/thumb/7/76/Université_Cadi_Ayyad.svg/1200px-Université_Cadi_Ayyad.svg.png"  # Replace if you want a different logo
 
 st.markdown(f"""
 <style>
-/* Background */
 .stApp {{
     background-image: url("https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg");
     background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     background-attachment: fixed;
 }}
-.stApp::before {{
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(45deg, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
-    z-index: -1;
-}}
 
-/* Top Bar Layout */
-.top-bar {{
+.top-header {{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 30px;
-    background-color: rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
-    margin-bottom: 20px;
+    padding: 15px 30px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }}
 
 .logo {{
     height: 60px;
 }}
 
-.animated-title {{
-  font-family: 'Roboto', sans-serif;
-  font-weight: 900;
-  font-size: 3.2rem;
-  animation: glowBounce 2.5s ease-in-out infinite;
-  user-select: none;
-  margin: 0;
+.title {{
+    font-family: 'Roboto', sans-serif;
+    font-size: 3.8rem;
+    font-weight: 900;
+    text-align: center;
+    animation: glowBounce 2.5s ease-in-out infinite;
+    margin: 0;
 }}
 
 @keyframes glowBounce {{
-  0%, 100% {{
-    color: #005c97;
-    text-shadow: 0 0 5px #7997e8, 0 0 10px #7997e8, 0 0 20px #7997e8;
-    transform: scale(1);
-  }}
-  50% {{
-    color: #f6d3ff;
-    text-shadow: 0 0 10px #f6d3ff, 0 0 30px #f6d3ff, 0 0 60px #7997e8;
-    transform: scale(1.1);
-  }}
+    0%, 100% {{
+        color: #005c97;
+        text-shadow: 0 0 5px #7997e8, 0 0 10px #7997e8;
+    }}
+    50% {{
+        color: #f6d3ff;
+        text-shadow: 0 0 20px #f6d3ff, 0 0 30px #7997e8;
+    }}
 }}
 
-/* Button */
-.about-button {{
-    padding: 10px 20px;
+.search-input {{
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #363795;
+    border-radius: 8px;
+    width: 220px;
+}}
+
+.about-btn {{
+    margin-left: 15px;
+    padding: 10px 18px;
     background: linear-gradient(45deg, #005c97, #363795);
     color: white;
-    border-radius: 8px;
     font-weight: bold;
+    border-radius: 8px;
     text-decoration: none;
+    transition: 0.3s ease;
 }}
-
-/* Search box */
-.search-box {{
-    padding: 8px;
-    border-radius: 10px;
-    width: 300px;
-    border: 2px solid #363795;
-    font-size: 16px;
+.about-btn:hover {{
+    background: #005c97;
 }}
-
 </style>
 
-<!-- TOP BAR -->
-<div class="top-bar">
+<!-- 🎯 FIXED TOP HEADER -->
+<div class="top-header">
     <img src="{logo_url}" class="logo">
-    <h1 class="animated-title">NeuroSeg</h1>
-    <div style="display: flex; gap: 15px;">
-        <input class="search-box" placeholder="🔍 Search..." />
-        <a href="#about-section" class="about-button">About</a>
+    <h1 class="title">NeuroSeg</h1>
+    <div style="display: flex; align-items: center;">
+        <input class="search-input" placeholder="🔍 Search..." />
+        <a href="#about-section" class="about-btn">About</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # =============================
-# 💬 INTRO + LOTTIE ANIMATION
+# 🧠 LOTTIE SECTION
 # =============================
 with st.container():
     col1, col2 = st.columns([1, 2], gap="large")
     with col1:
         com.iframe("https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie", height=400)
     with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
             "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
             unsafe_allow_html=True
         )
 
 # =============================
-# 🚀 MAIN FUNCTIONALITY
+# 🚀 MAIN APP
 # =============================
 st.markdown("<br><hr><br>", unsafe_allow_html=True)
 col1, col2 = st.columns(2, gap="large")
 
 with col1:
     st.header("1. Get & Upload Model")
-    st.markdown("Download the pre-trained model file:")
-    model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
-    st.link_button("⬇️ Download Model (.tflite)", model_download_url, use_container_width=True)
+    model_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
+    st.link_button("⬇️ Download Model (.tflite)", model_url, use_container_width=True)
     model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
 
     interpreter = None
@@ -186,7 +174,7 @@ if model_loaded and image_file:
             display_prediction(img_pil, pred_mask)
 
 # =============================
-# 🔗 ABOUT SECTION (ANCHOR)
+# 🧾 ABOUT SECTION
 # =============================
 st.markdown('<br><br><hr><br>', unsafe_allow_html=True)
 st.markdown('<h2 id="about-section">👩‍⚕️ About the Project</h2>', unsafe_allow_html=True)
