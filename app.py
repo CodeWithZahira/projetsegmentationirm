@@ -249,7 +249,7 @@ st.markdown("""
         <div class="footer-column">
             <h4>Project</h4>
             <p>Automatic Brain MRI Segmentation</p>
-            <p>Master in Biomedical Engineering</p>
+            <p>Master's in biomedical instrumentation and analysis</p>
         </div>
     </div>
     <div class="footer-bottom">
