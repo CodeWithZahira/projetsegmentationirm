@@ -85,22 +85,22 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader {
 # 👤 SIDEBAR - ABOUT & CREDITS
 # =============================
 # --- Replace this with the URL of your university's logo ---
-logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/MIT_logo.svg/1200px-MIT_logo.svg.png" # Example: MIT Logo
+logo_url = "https://www.uca.ma/public/files/images/site-159-09ccd13bdac13d0d067f6c29cd636c58-1518715952.png"
 
 st.sidebar.image(logo_url, width=150)
 st.sidebar.title("About this Project")
 st.sidebar.markdown("---")
 
 st.sidebar.header("Author")
-st.sidebar.write("👤 **Name:** [Your Name Here]")
-st.sidebar.write("📧 **Email:** [your.email@university.edu]")
+st.sidebar.write("👤 **Name:** [ELLAOUAH Zahira]")
+st.sidebar.write("📧 **Email:** [zahiraellaouah@gmail.com]")
 st.sidebar.markdown("---")
 
 st.sidebar.header("Supervisors")
-st.sidebar.write("👨‍🏫 **Supervisor 1:** [Professor's Name]")
-st.sidebar.write("👨‍🏫 **Supervisor 2:** [Professor's Name]")
+st.sidebar.write("👨‍🏫 **Supervisor 1:** [Professor OUMGHAR Nezha]")
+st.sidebar.write("👨‍🏫 **Supervisor 2:** [Professor CHADI Mohammed Amine]")
 st.sidebar.markdown("---")
-st.sidebar.info("This application was developed as part of a research project at [Your University Name].")
+st.sidebar.info("This application was developed as part of a research project at Faculty of Medicine and Pharmacy of Marrakech")
 
 
 # =============================
