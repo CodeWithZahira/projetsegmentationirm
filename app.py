@@ -150,17 +150,41 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 # =============================
 # 💬 WELCOME SECTION
 # =============================
-st.markdown('<h1 class="animated-title">NeuroSeg</h1>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size:1.5rem;'>Upload your model and MRI images or videos to explore AI-powered segmentation in action.</p>", unsafe_allow_html=True)
+with st.container():
+    col1, col2 = st.columns([1, 2], gap="large")
+    with col1:
+        com.iframe(
+            "https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie",
+            height=400
+        )
+    with col2:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown('<h1 class="animated-title">NeuroSeg</h1>', unsafe_allow_html=True)
+        st.markdown(
+            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan(s) to experience the power of AI-driven segmentation.</p>",
+            unsafe_allow_html=True
+        )
 
 # =============================
-# MODEL & IMAGE UPLOAD
+# 🚀 MAIN APPLICATION
 # =============================
-col1, col2 = st.columns(2)
+st.markdown("<br><hr><br>", unsafe_allow_html=True)
+
+col1, col2 = st.columns(2, gap="large")
 
 with col1:
-    st.header("1. Upload Model")
-    model_file = st.file_uploader("Upload .tflite model", type=["tflite"])
+    st.header("1. Get & Upload Model")
+    st.markdown("First, download the pre-trained model file.")
+    model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
+
+    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
+    st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("Then, upload the downloaded file here:")
+    model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
+
     interpreter = None
     model_loaded = False
     if model_file:
@@ -174,73 +198,101 @@ with col1:
             st.error(f"❌ Error loading model: {e}")
 
 with col2:
-    st.header("2. Upload MRI Images")
-    image_files = st.file_uploader("Upload one or more images", type=["jpg", "jpeg", "png", "tif"], accept_multiple_files=True)
+    st.header("2. Upload MRI Image(s)")
+    st.markdown("Now, upload one or more MRI scans:")
+    image_files = st.file_uploader(
+        "Upload MRI Images", 
+        type=["png", "jpg", "jpeg", "tif", "tiff"], 
+        label_visibility="collapsed", 
+        accept_multiple_files=True
+    )
     if image_files:
         for file in image_files:
             st.image(file, caption=file.name, use_container_width=True)
 
-# =============================
-# 📽️ VIDEO UPLOAD & FRAME EXTRACTION
-# =============================
-st.markdown("### 📽️ Or Upload an MRI Video")
-video_file = st.file_uploader("Upload a video file", type=["mp4", "avi", "mov"], key="video")
-video_frames = []
-
-if video_file is not None:
-    st.video(video_file)
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        tmp_file.write(video_file.read())
-        tmp_path = tmp_file.name
-
-    cap = cv2.VideoCapture(tmp_path)
-    success, frame = cap.read()
-    frame_count = 0
-
-    while success and frame_count < 20:
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        pil_img = Image.fromarray(gray)
-        video_frames.append(pil_img)
-        success, frame = cap.read()
-        frame_count += 1
-    cap.release()
-
-    st.success(f"✅ Extracted {len(video_frames)} frames from video.")
-    for idx, frame in enumerate(video_frames):
-        st.image(frame, caption=f"Frame {idx+1}", use_container_width=True)
+if model_loaded and image_files:
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
+    if st.button("🔍 Perform Segmentation for All Images", use_container_width=True):
+        for idx, image_file in enumerate(image_files):
+            with st.spinner(f"Analyzing image {idx + 1}..."):
+                try:
+                    img_array, img_pil = preprocess_image(image_file)
+                    pred_mask = tflite_predict(interpreter, img_array)
+                    display_prediction(img_pil, pred_mask)
+                except Exception as e:
+                    st.error(f"❌ Error with image {image_file.name}: {e}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
-# SEGMENTATION SECTION
-# =============================
-if model_loaded:
-    if image_files:
-        st.markdown("<h3>🔬 Segment Uploaded Images</h3>", unsafe_allow_html=True)
-        if st.button("Segment Images"):
-            for idx, image_file in enumerate(image_files):
-                with st.spinner(f"Segmenting image {idx + 1}..."):
-                    try:
-                        img_array, img_pil = preprocess_image(image_file)
-                        pred_mask = tflite_predict(interpreter, img_array)
-                        display_prediction(img_pil, pred_mask)
-                    except Exception as e:
-                        st.error(f"❌ Error with image {image_file.name}: {e}")
-
-    if video_frames:
-        st.markdown("<h3>🎞️ Segment Extracted Frames</h3>", unsafe_allow_html=True)
-        if st.button("Segment Frames"):
-            for idx, frame_img in enumerate(video_frames):
-                with st.spinner(f"Segmenting frame {idx + 1}..."):
-                    try:
-                        img_array, processed_img = preprocess_image(frame_img)
-                        pred_mask = tflite_predict(interpreter, img_array)
-                        display_prediction(processed_img, pred_mask)
-                    except Exception as e:
-                        st.error(f"❌ Error with frame {idx + 1}: {e}")
-
-# =============================
-# FOOTER
+# 🎓 FOOTER
 # =============================
 st.markdown("""
----
-<p style="text-align:center;font-size:14px;">© 2025 Zahira Ellaouah · Supervised by Pr. Nezha Oumghar & Pr. Mohamed Amine Chadi · Cadi Ayyad University – FMPM</p>
+<style>
+.booking-style-footer {
+    background-color: #f9f9f9;
+    padding: 50px 30px 20px 30px;
+    font-family: sans-serif;
+    border-top: 1px solid #ddd;
+    color: black;
+}
+.booking-style-footer h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.booking-style-footer p, .booking-style-footer a {
+    font-size: 15px;
+    color: black;
+    text-decoration: none;
+    margin: 4px 0;
+}
+.footer-columns {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 50px;
+}
+.footer-column {
+    flex: 1;
+    min-width: 200px;
+}
+.footer-bottom {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+</style>
+
+<div class="booking-style-footer">
+    <div class="footer-columns">
+        <div class="footer-column">
+            <h4>Developed By</h4>
+            <p>Zahira ELLAOUAH</p>
+            <p><a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
+        </div>
+        <div class="footer-column">
+            <h4>Supervised By</h4>
+            <p>Pr. Nezha Oumghar</p>
+            <p>Pr. Mohamed Amine Chadi</p>
+        </div>
+        <div class="footer-column">
+            <h4>University</h4>
+            <p>Cadi Ayyad University</p>
+            <p>Faculty of Medicine and Pharmacy</p>
+            <p>Marrakesh</p>
+        </div>
+        <div class="footer-column">
+            <h4>Project</h4>
+            <p>Automatic Segmentation of Brain MRIs by Convolutional Neural Network U-Net</p>
+            <p>Master's in biomedical instrumentation and analysis</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 Zahira Ellaouah – All rights reserved</p>
+    </div>
+</div>
 """, unsafe_allow_html=True)
