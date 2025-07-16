@@ -113,6 +113,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 .animated-button-container .stButton>button:hover, .st-emotion-cache-19n6j20 a:hover {{
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
 }}
 
 /* --- Custom Footer Styling (FIXED) --- */
