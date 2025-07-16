@@ -11,4 +11,5 @@ tqdm
 pandas
 scikit-image
 opencv-python-headless
+fpdf
 
