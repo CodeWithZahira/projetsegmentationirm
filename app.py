@@ -10,8 +10,11 @@ import os
 # =============================
 # 📦 UTILITY FUNCTIONS
 # =============================
-def preprocess_image(image_file, target_size=(128, 128)):
-    image = Image.open(image_file).convert("L")
+def preprocess_image(image_input, target_size=(128, 128)):
+    if isinstance(image_input, Image.Image):
+        image = image_input.convert("L")
+    else:
+        image = Image.open(image_input).convert("L")
     image = image.resize(target_size)
     img_array = np.array(image) / 255.0
     img_array = img_array.astype(np.float32)
@@ -39,7 +42,7 @@ def display_prediction(image_pil, mask):
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".avi") as tmp_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
         tmp_file.write(video_file.read())
         tmp_file_path = tmp_file.name
 
@@ -89,7 +92,7 @@ st.markdown(f"""
     z-index: -1;
 }}
 
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button {{
     color: black !important;
 }}
 
@@ -184,7 +187,7 @@ with st.container():
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown('<h1 class="animated-title">NeuroSeg</h1>', unsafe_allow_html=True)
         st.markdown(
-            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan(s) to experience the power of AI-driven segmentation.</p>",
+            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan(s) or video to experience the power of AI-driven segmentation.</p>",
             unsafe_allow_html=True
         )
 
@@ -222,17 +225,8 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    image_files = st.file_uploader(
-        "Upload MRI Images",
-        type=["png", "jpg", "jpeg", "tif", "tiff"],
-        accept_multiple_files=True,
-        label_visibility="collapsed"
-    )
-    video_file = st.file_uploader(
-        "Or upload an MRI Video (mp4, avi)",
-        type=["mp4", "avi"],
-        label_visibility="collapsed"
-    )
+    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
+    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
 
     all_images = []
     if image_files:
@@ -254,19 +248,12 @@ if model_loaded and all_images:
         for idx, item in enumerate(all_images):
             with st.spinner(f"Analyzing image {idx + 1}..."):
                 try:
-                    if isinstance(item, Image.Image):
-                        img_array, img_pil = preprocess_image(item)
-                    else:
-                        img_array, img_pil = preprocess_image(item)
+                    img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
                     display_prediction(img_pil, pred_mask)
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
-
-# =============================
-# 🎓 FOOTER
-# =============================
 
 # =============================
 # 🎓 FOOTER
@@ -340,7 +327,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-
-
-
