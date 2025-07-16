@@ -10,3 +10,5 @@ scikit-learn
 tqdm
 pandas
 scikit-image
+opencv-python-headless
+
