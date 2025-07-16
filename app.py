@@ -199,7 +199,7 @@ logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Ap
 f_col1, f_col2 = st.columns([1, 2])
 with f_col1:
     st.markdown(f'<div style="text-align: center; padding-top: 20px;"><img src="{logo_url}" width="100"></div>', unsafe_allow_html=True)
-    st.markdown("<p class='footer'>[Your University Name]</p>", unsafe_allow_html=True)
+    st.markdown("<p class='footer'>Cadi Ayyad University, Faculties of Medicine and Pharmacie</p>", unsafe_allow_html=True)
 with f_col2:
     st.markdown(
         """
@@ -207,7 +207,7 @@ with f_col2:
             <h4>Developed By</h4>
             <p> ELLAOUAH ZAHIRA | <a href="mailto: zahiraellaouah@gmail.com">📧 [zahiraellaouah@gmail.com]</a></p>
             <h4>Under the Supervision of</h4>
-            <p>Pr. Nezha Oumghar  Pr. Mohamed Amine Chadi</p>
+            <p>Pr. Nezha Oumghar                Pr. Mohamed Amine Chadi</p>
         </div>
         """,
         unsafe_allow_html=True
