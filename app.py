@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import numpy as np
 from PIL import Image
@@ -20,7 +18,7 @@ def preprocess_image(uploaded_file, target_size=(128, 128)):
     image = image.resize(target_size)
     img_array = np.array(image) / 255.0
     img_array = img_array.astype(np.float32)
-    img_array = np.expand_dims(img_array, axis=(0, -1))  # (1, H, W, 1)
+    img_array = np.expand_dims(img_array, axis=(0, -1))
     return img_array, image
 
 def tflite_predict(interpreter, input_data):
@@ -38,18 +36,16 @@ def display_prediction(image_pil, mask):
     axs[0].imshow(image_pil, cmap="gray")
     axs[0].set_title("Image Originale")
     axs[0].axis("off")
-
     axs[1].imshow(mask, cmap="gray")
     axs[1].set_title("Masque Prédit")
     axs[1].axis("off")
-
     buf = io.BytesIO()
     plt.tight_layout()
     plt.savefig(buf, format="png")
     st.image(buf)
 
 # =============================
-# 🎅 STYLES AND ANIMATION
+# 🌈 STYLES & ANIMATIONS
 # =============================
 st.markdown("""
     <style>
@@ -64,7 +60,7 @@ st.markdown("""
         top: 0;
         left: 0;
         right: 0;
-        background-color: rgba(0, 0, 0, 0.8);
+        background-color: rgba(0, 0, 0, 0.85);
         padding: 1rem 2rem;
         display: flex;
         justify-content: space-between;
@@ -93,28 +89,33 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
         animation: fadeIn 2s ease-in-out;
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
     }
     #home {
-        background: url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
-        background-size: cover;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(10,10,10,0.8)),
+                    url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
     }
     #predict {
-        background: url('https://img.freepik.com/premium-photo/human-brain-3d-illustration-brainstorming-conceptgenerative-ai_841229-1720.jpg') no-repeat center center;
-        background-size: cover;
+        background: linear-gradient(to bottom right, rgba(0,0,0,0.6), rgba(34,34,34,0.9)),
+                    url('https://img.freepik.com/premium-photo/human-brain-3d-illustration-brainstorming-conceptgenerative-ai_841229-1720.jpg') no-repeat center center;
     }
     #about {
-        background: url('https://thumbs.dreamstime.com/b/modern-friendly-robot-artificial-intelligence-greets-raising-his-hand-saying-hello-hallway-office-many-330419098.jpg') no-repeat center center;
-        background-size: cover;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(30,30,30,0.85)),
+                    url('https://thumbs.dreamstime.com/b/modern-friendly-robot-artificial-intelligence-greets-raising-his-hand-saying-hello-hallway-office-many-330419098.jpg') no-repeat center center;
     }
     h1.animated-title {
         font-size: 3.5em;
-        animation: slideDown 2s ease-out;
-        color: black;
+        animation: floatUp 6s infinite;
+        color: white;
         text-align: left;
     }
-    @keyframes slideDown {
-        0% { opacity: 0; transform: translateY(-50px); }
-        100% { opacity: 1; transform: translateY(0); }
+    @keyframes floatUp {
+      0% { transform: translateY(10px); opacity: 0.8; }
+      50% { transform: translateY(0px); opacity: 1; }
+      100% { transform: translateY(10px); opacity: 0.8; }
     }
     @keyframes fadeIn {
         from {opacity: 0;}
@@ -153,16 +154,16 @@ st.markdown("""
 # =============================
 st.markdown("""
 <section id="home" class="section">
-  <h1 class="animated-title">Bienvenue </h1>
+  <h1 class="animated-title">Bienvenue</h1>
   <h1 class="animated-title">sur NeuroSeg</h1>
-  <h3 style="color:black; text-align: left;">Application de segmentation IRM basée sur l'IA</h3>
-  <p style="color:black; text-align: left;">Crée par Zahira ELLAOUAH </p>
+  <h3 style="color:white; text-align: left;">Application de segmentation IRM basée sur l'IA</h3>
+  <p style="color:white; text-align: left;">Créée par Zahira ELLAOUAH</p>
   <a href="#predict"><button class="btn-main">Commencer</button></a>
 </section>
 """, unsafe_allow_html=True)
 
 # =============================
-# 🧐 SECTION: PREDICTION
+# 🧠 SECTION: PREDICTION
 # =============================
 st.markdown("""
 <section id="predict" class="section">
@@ -189,18 +190,27 @@ if image_file and model_loaded:
         pred_mask = tflite_predict(interpreter, img_array)
         display_prediction(img_pil, pred_mask)
 
+# 3D Brain Model
 st.markdown("""
+<h3 style="color:white">🧠 Modèle 3D de cerveau</h3>
+<iframe title="3D Brain" frameborder="0" allowfullscreen
+        mozallowfullscreen="true" webkitallowfullscreen="true"
+        allow="autoplay; fullscreen; xr-spatial-tracking"
+        xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share
+        width="640" height="480"
+        src="https://sketchfab.com/models/327caa38dbef4bc9a7c7e3a16ed7e1cb/embed">
+</iframe>
 </section>
 """, unsafe_allow_html=True)
 
 # =============================
-# ℹ️ SECTION: ABOUT / CONTACT
+# ℹ️ SECTION: CONTACT
 # =============================
 st.markdown("""
 <section id="about" class="section">
   <h2>📞 Contact</h2>
-  <p>Email: zahiraellaouah@gmail.com</p>
-  <p style="color:black">Développé dans le cadre du Master en Ingénierie Biomédicale - Université Qadi Ayyad FMPM </p>
+  <p>Email: <a style="color:white" href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
+  <p style="color:white">Développé dans le cadre du Master en Ingénierie Biomédicale - Université Cadi Ayyad FMPM</p>
 </section>
 """, unsafe_allow_html=True)
 
