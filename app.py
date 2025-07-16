@@ -39,9 +39,10 @@ def display_prediction(image_pil, mask):
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".avi") as tmp_file:
         tmp_file.write(video_file.read())
         tmp_file_path = tmp_file.name
+
     cap = cv2.VideoCapture(tmp_file_path)
     count = 0
     while count < max_frames and cap.isOpened():
@@ -92,6 +93,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     color: black !important;
 }}
 
+/* Animated Button */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -131,6 +133,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
+/* 🔥 BIG Attention-Grabbing Title Animation */
 @keyframes glowBounce {{
   0%, 100% {{
     color: #005c97;
@@ -181,7 +184,7 @@ with st.container():
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown('<h1 class="animated-title">NeuroSeg</h1>', unsafe_allow_html=True)
         st.markdown(
-            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model, image(s), or video to experience the power of AI-driven segmentation.</p>",
+            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan(s) to experience the power of AI-driven segmentation.</p>",
             unsafe_allow_html=True
         )
 
@@ -196,12 +199,15 @@ with col1:
     st.header("1. Get & Upload Model")
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
+
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
     model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
+
     interpreter = None
     model_loaded = False
     if model_file:
@@ -216,13 +222,24 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
-    video_file = st.file_uploader("Or upload an MRI Video (mp4)", type=["mp4"], label_visibility="collapsed")
+    image_files = st.file_uploader(
+        "Upload MRI Images",
+        type=["png", "jpg", "jpeg", "tif", "tiff"],
+        accept_multiple_files=True,
+        label_visibility="collapsed"
+    )
+    video_file = st.file_uploader(
+        "Or upload an MRI Video (mp4, avi)",
+        type=["mp4", "avi"],
+        label_visibility="collapsed"
+    )
+
     all_images = []
     if image_files:
         for file in image_files:
             st.image(file, caption=file.name, use_container_width=True)
             all_images.append(file)
+
     if video_file:
         with st.spinner("Extracting frames from video..."):
             frames = extract_frames_from_video(video_file)
@@ -237,7 +254,10 @@ if model_loaded and all_images:
         for idx, item in enumerate(all_images):
             with st.spinner(f"Analyzing image {idx + 1}..."):
                 try:
-                    img_array, img_pil = preprocess_image(item)
+                    if isinstance(item, Image.Image):
+                        img_array, img_pil = preprocess_image(item)
+                    else:
+                        img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
                     display_prediction(img_pil, pred_mask)
                 except Exception as e:
@@ -293,26 +313,4 @@ st.markdown("""
             <h4>Developed By</h4>
             <p>Zahira ELLAOUAH</p>
             <p><a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
-        </div>
-        <div class="footer-column">
-            <h4>Supervised By</h4>
-            <p>Pr. Nezha Oumghar</p>
-            <p>Pr. Mohamed Amine Chadi</p>
-        </div>
-        <div class="footer-column">
-            <h4>University</h4>
-            <p>Cadi Ayyad University</p>
-            <p>Faculty of Medicine and Pharmacy</p>
-            <p>Marrakesh</p>
-        </div>
-        <div class="footer-column">
-            <h4>Project</h4>
-            <p>Automatic Segmentation of Brain MRIs by Convolutional Neural Network U-Net</p>
-            <p>Master's in biomedical instrumentation and analysis</p>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p>© 2025 Zahira Ellaouah – All rights reserved</p>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+        </
