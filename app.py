@@ -15,7 +15,7 @@ st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 # 🎨 STYLING & ASSETS
 # =============================
 # --- Background Image ---
-image_url = "https://images.unsplash.com/photo-1699046794994-865a62e9ff6f?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+image_url = "https://images.unsplash.com/photo-1732096260253-f2030340e1ef?q=80&w=967&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 # --- Main CSS for Background, Fonts, and the NEW Button Animation ---
 st.markdown(f"""
 <style>
