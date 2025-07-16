@@ -8,7 +8,6 @@ import tempfile
 import os
 from io import BytesIO
 from fpdf import FPDF
-import zipfile
 
 # =============================
 # 📦 UTILITY FUNCTIONS
@@ -35,17 +34,14 @@ def tflite_predict(interpreter, input_data):
     prediction = (prediction > 0.5).astype(np.uint8) * 255
     return prediction
 
-def overlay_mask_on_image(image_pil, mask, color=(255, 0, 0), alpha=0.4):
-    # Rogner l'image à la taille du masque
-    width_mask, height_mask = mask.shape[1], mask.shape[0]
-    image_cropped = image_pil.crop((0, 0, width_mask, height_mask))
-    
-    image_np = np.array(image_cropped.convert("RGB"))
-    mask_rgb = np.zeros_like(image_np)
-    mask_rgb[mask == 255] = color
-    blended = cv2.addWeighted(image_np, 1, mask_rgb, alpha, 0)
-    return Image.fromarray(blended)
-
+def display_prediction(image_pil, mask):
+    st.markdown("---")
+    st.subheader("Segmentation Result")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image(image_pil, caption="Original MRI Scan", use_container_width=True)
+    with col2:
+        st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
@@ -67,48 +63,72 @@ def extract_frames_from_video(video_file, max_frames=30):
     os.remove(tmp_file_path)
     return frames
 
-def generate_combined_downloads(all_results):
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zipf:
-        for idx, (orig, mask, overlay) in enumerate(all_results):
-            # Save overlay as PNG
-            img_bytes = BytesIO()
-            overlay.save(img_bytes, format="PNG")
-            zipf.writestr(f"segmented_{idx+1}.png", img_bytes.getvalue())
+def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
+    # Convert mask array to PIL Image (grayscale)
+    mask_pil = Image.fromarray(mask).convert("L")
+    # Resize mask to original image size (if needed)
+    mask_pil = mask_pil.resize(original.size)
+    # Create a new image wide enough to hold both side by side
+    combined_width = original.width + mask_pil.width
+    combined_height = max(original.height, mask_pil.height)
+    combined_img = Image.new("RGB", (combined_width, combined_height))
+    # Convert original grayscale to RGB
+    original_rgb = original.convert("RGB")
+    combined_img.paste(original_rgb, (0, 0))
+    combined_img.paste(mask_pil.convert("RGB"), (original.width, 0))
+    # Add labels
+    draw = ImageDraw.Draw(combined_img)
+    font = ImageFont.load_default()
+    draw.text((10, 10), "MRI Scan", fill="red", font=font)
+    draw.text((original.width + 10, 10), "Segmentation Mask", fill="red", font=font)
+    return combined_img
 
-            # Save overlay as PDF
-            pdf = FPDF()
-            pdf.add_page()
-            pdf_w, pdf_h = pdf.w - 2*pdf.l_margin, pdf.h - 2*pdf.t_margin
-            buffered_pdf_img = BytesIO()
-            overlay.save(buffered_pdf_img, format="JPEG")
-            buffered_pdf_img.seek(0)
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img_file:
-                tmp_img_file.write(buffered_pdf_img.read())
-                tmp_img_file_path = tmp_img_file.name
-            pdf.image(tmp_img_file_path, x=pdf.l_margin, y=pdf.t_margin, w=pdf_w)
-            pdf_bytes = pdf.output(dest="S").encode("latin1")
-            zipf.writestr(f"segmented_{idx+1}.pdf", pdf_bytes)
-            os.remove(tmp_img_file_path)
+def get_combined_download_links(original, mask, idx):
+    combined_img = combine_images(original, mask)
 
-    zip_buffer.seek(0)
+    # PNG download
+    buffered = BytesIO()
+    combined_img.save(buffered, format="PNG")
+    png_data = buffered.getvalue()
     st.download_button(
-        label="📦 Download All Segmentations (PNG + PDF)",
-        data=zip_buffer,
-        file_name="all_segmented_results.zip",
-        mime="application/zip"
+        label="📥 Download MRI + Mask as PNG",
+        data=png_data,
+        file_name=f"combined_{idx+1}.png",
+        mime="image/png"
+    )
+
+    # PDF download
+    pdf = FPDF()
+    pdf.add_page()
+    pdf_w, pdf_h = pdf.w - 2*pdf.l_margin, pdf.h - 2*pdf.t_margin
+
+    buffered_pdf_img = BytesIO()
+    combined_img.save(buffered_pdf_img, format="JPEG")
+    buffered_pdf_img.seek(0)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img_file:
+        tmp_img_file.write(buffered_pdf_img.read())
+        tmp_img_file_path = tmp_img_file.name
+
+    pdf.image(tmp_img_file_path, x=pdf.l_margin, y=pdf.t_margin, w=pdf_w)
+    pdf_output = pdf.output(dest="S").encode("latin1")
+    os.remove(tmp_img_file_path)
+
+    st.download_button(
+        label="📥 Download MRI + Mask as PDF",
+        data=pdf_output,
+        file_name=f"combined_{idx+1}.pdf",
+        mime="application/pdf"
     )
 
 # =============================
 # 🔧 PAGE CONFIG
 # =============================
-
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
 # 🎨 STYLING & BACKGROUND + TITLE ANIMATION
 # =============================
-
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
 <style>
@@ -133,10 +153,11 @@ st.markdown(f"""
     z-index: -1;
 }}
 
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button {{
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
     color: black !important;
 }}
 
+/* Animated Button */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -176,6 +197,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
+/* 🔥 BIG Attention-Grabbing Title Animation */
 @keyframes glowBounce {{
   0%, 100% {{
     color: #005c97;
@@ -215,7 +237,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 # =============================
 # 💬 WELCOME SECTION
 # =============================
-
 with st.container():
     col1, col2 = st.columns([1, 2], gap="large")
     with col1:
@@ -234,12 +255,23 @@ with st.container():
 # =============================
 # 🚀 MAIN APPLICATION
 # =============================
+st.markdown("<br><hr><br>", unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns(2, gap="large")
 
 with col1:
-    st.header("1. Upload Model")
-    model_file = st.file_uploader("Upload your TFLite model", type=["tflite"])
+    st.header("1. Get & Upload Model")
+    st.markdown("First, download the pre-trained model file.")
+    model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
+
+    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
+    st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("Then, upload the downloaded file here:")
+    model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
+
     interpreter = None
     model_loaded = False
     if model_file:
@@ -254,64 +286,46 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True)
-    video_file = st.file_uploader("Or upload a video (mp4 or avi)", type=["mp4", "avi"])
+    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
+    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
 
-all_images = []
-if image_files:
-    for file in image_files:
-        st.image(file, caption=file.name, use_container_width=True)
-        all_images.append(file)
+    all_images = []
+    if image_files:
+        for file in image_files:
+            st.image(file, caption=file.name, use_container_width=True)
+            all_images.append(file)
 
-if video_file:
-    with st.spinner("Extracting frames from video..."):
-        frames = extract_frames_from_video(video_file)
-        for i, frame in enumerate(frames):
-            st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
-            all_images.append(frame)
-
-# =============================
-# 🔍 Perform Segmentation
-# =============================
+    if video_file:
+        with st.spinner("Extracting frames from video..."):
+            frames = extract_frames_from_video(video_file)
+            for i, frame in enumerate(frames):
+                st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
+                all_images.append(frame)
 
 if model_loaded and all_images:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
-    if st.button("🔍 Perform Segmentation", use_container_width=True):
-        all_results = []
+    if st.button("🔍 Perform Segmentation for All Inputs", use_container_width=True):
         for idx, item in enumerate(all_images):
-            with st.spinner(f"Processing input {idx + 1}..."):
+            with st.spinner(f"Analyzing input {idx + 1}..."):
                 try:
                     if isinstance(item, Image.Image):
                         img_array, img_pil = preprocess_image(item)
                     else:
                         img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
+                    display_prediction(img_pil, pred_mask)
 
-                    overlay_img = overlay_mask_on_image(img_pil, pred_mask)
-
-                    # Afficher taille pour debug
-                    st.write(f"Original image size: {img_pil.size}")
-                    st.write(f"Mask size: {(pred_mask.shape[1], pred_mask.shape[0])}")
-
-                    # Affichage de l'image superposée
-                    st.image(overlay_img, caption=f"Overlay MRI + Mask {idx+1} (resized)", use_container_width=False)
-
-                    # Ajouter pour téléchargement batch
-                    all_results.append((img_pil, pred_mask, overlay_img))
+                    # Combined download links
+                    get_combined_download_links(img_pil, pred_mask, idx)
 
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
-
-        # Bouton de téléchargement ZIP
-        generate_combined_downloads(all_results)
-
     st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
 # 🎓 FOOTER
 # =============================
-
 st.markdown("""
 <style>
 .booking-style-footer {
