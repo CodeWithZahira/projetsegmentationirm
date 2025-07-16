@@ -43,10 +43,9 @@ st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 # =============================
 # 🎨 STYLING & BACKGROUND
 # =============================
-image_url = "https://images.pexels.com/photos/7130560/pexels-photo-7130560.jpeg"
+image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
 <style>
-/* CSS Variable for other animations */
 @property --a {{
   syntax: "<angle>";
   initial-value: 0deg;
@@ -64,37 +63,14 @@ st.markdown(f"""
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    /* Using a darker overlay to make white text pop */
-    background: linear-gradient(45deg, rgba(15, 32, 39, 0.8), rgba(32, 58, 67, 0.9));
+    background: linear-gradient(45deg, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
     z-index: -1;
 }}
 
-/* Set default text color to white for better readability on dark overlay */
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label {{
-    color: white !important;
+/* Set all text to black */
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj, .custom-footer-box, .custom-footer-box * {{
+    color: black !important;
 }}
-
-/* --- ✨ NEW Title Animation --- */
-.title-animation {{
-    font-size: 4rem; /* Making title a bit bigger */
-    font-weight: 800;
-    font-family: sans-serif;
-    text-align: center;
-    background: linear-gradient(to right, #7997e8, #f6d3ff, #8aa9f7, #f6d3ff);
-    background-size: 200% auto;
-    color: #000;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: animateGradient 5s linear infinite;
-}}
-@keyframes animateGradient {{
-    to {{
-        background-position: 200% center;
-    }}
-}}
-/* --- End of Title Animation --- */
-
 
 /* Animated Button */
 .animated-button-container {{
@@ -119,10 +95,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label {{
 @keyframes rotateGlow {{
   to {{ --a: 1turn; }}
 }}
-.animated-button-container .stButton>button, .animated-button-container .st-emotion-cache-19n6j20 a {{
+.animated-button-container .stButton>button {{
     width: 100%;
     background: linear-gradient(45deg, #005c97, #363795);
-    color: white !important; /* Button text is white */
+    color: black !important;
     border-radius: 50px;
     padding: 15px 30px;
     font-size: 18px;
@@ -130,57 +106,42 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label {{
     border: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    text-decoration: none;
 }}
-.animated-button-container .stButton>button:hover, .animated-button-container .st-emotion-cache-19n6j20 a:hover {{
+.animated-button-container .stButton>button:hover {{
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
-/* Footer Styling */
-.booking-style-footer {{
-    background-color: #0d1117; /* Dark footer to match theme */
-    padding: 50px 30px 20px 30px;
-    font-family: sans-serif;
-    border-top: 1px solid #30363d;
-    color: #c9d1d9; /* Light grey text */
+/* Cute pulsing animation for title */
+@keyframes pulse {{
+  0% {{
+    color: #005c97;
+    transform: scale(1);
+    text-shadow: 0 0 5px #7997e8;
+  }}
+  50% {{
+    color: #f6d3ff;
+    transform: scale(1.1);
+    text-shadow: 0 0 20px #f6d3ff;
+  }}
+  100% {{
+    color: #005c97;
+    transform: scale(1);
+    text-shadow: 0 0 5px #7997e8;
+  }}
 }}
-.booking-style-footer h4 {{
-    font-size: 18px;
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: white;
+
+.animated-title {{
+  font-family: 'Roboto', sans-serif;
+  font-weight: 800;
+  font-size: 3.5rem;
+  text-align: center;
+  animation: pulse 3s ease-in-out infinite;
+  user-select: none;
+  margin-bottom: 0.5rem;
 }}
-.booking-style-footer p, .booking-style-footer a {{
-    font-size: 15px;
-    color: #c9d1d9;
-    text-decoration: none;
-    margin: 4px 0;
-}
-.booking-style-footer a:hover {{
-    text-decoration: underline;
-}
-.footer-columns {{
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 50px;
-}
-.footer-column {{
-    flex: 1;
-    min-width: 200px;
-}
-.footer-bottom {{
-    margin-top: 30px;
-    text-align: center;
-    font-size: 13px;
-    color: #8b949e;
-    border-top: 1px solid #30363d;
-    padding-top: 15px;
-}
 </style>
 """, unsafe_allow_html=True)
-
 
 # =============================
 # 💬 WELCOME SECTION
@@ -194,9 +155,8 @@ with st.container():
         )
     with col2:
         st.markdown("<br><br>", unsafe_allow_html=True)
-        # Applying the new .title-animation class to the h1 tag
         st.markdown(
-            "<h1 class='title-animation'>NeuroSeg</h1>",
+            '<h1 class="animated-title">NeuroSeg</h1>',
             unsafe_allow_html=True
         )
         st.markdown(
@@ -216,7 +176,6 @@ with col1:
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
 
-    # Wrapping the link_button in the animation container
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -246,7 +205,6 @@ with col2:
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
-    # Wrapping the regular button in the animation container
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation", use_container_width=True):
         with st.spinner('Analyzing the image...'):
@@ -259,6 +217,45 @@ if model_loaded and image_file:
 # 🎓 BOOKING.COM STYLE FOOTER
 # =============================
 st.markdown("""
+<style>
+.booking-style-footer {
+    background-color: #f9f9f9;
+    padding: 50px 30px 20px 30px;
+    font-family: sans-serif;
+    border-top: 1px solid #ddd;
+    color: black;
+}
+.booking-style-footer h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.booking-style-footer p, .booking-style-footer a {
+    font-size: 15px;
+    color: black;
+    text-decoration: none;
+    margin: 4px 0;
+}
+.footer-columns {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 50px;
+}
+.footer-column {
+    flex: 1;
+    min-width: 200px;
+}
+.footer-bottom {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+</style>
+
 <div class="booking-style-footer">
     <div class="footer-columns">
         <div class="footer-column">
