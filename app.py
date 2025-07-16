@@ -36,15 +36,16 @@ def tflite_predict(interpreter, input_data):
     return prediction
 
 def overlay_mask_on_image(image_pil, mask, color=(255, 0, 0), alpha=0.4):
-    # Redimensionner l'image à la taille du masque (largeur, hauteur)
-    target_size = (mask.shape[1], mask.shape[0])
-    image_resized = image_pil.resize(target_size, resample=Image.BILINEAR)
-
-    image_np = np.array(image_resized.convert("RGB"))
+    # Rogner l'image à la taille du masque
+    width_mask, height_mask = mask.shape[1], mask.shape[0]
+    image_cropped = image_pil.crop((0, 0, width_mask, height_mask))
+    
+    image_np = np.array(image_cropped.convert("RGB"))
     mask_rgb = np.zeros_like(image_np)
     mask_rgb[mask == 255] = color
     blended = cv2.addWeighted(image_np, 1, mask_rgb, alpha, 0)
     return Image.fromarray(blended)
+
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
