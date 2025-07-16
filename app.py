@@ -170,7 +170,7 @@ col1, col2 = st.columns(2, gap="large")
 with col1:
     st.header("1. Get & Upload Model")
     st.markdown("First, download the pre-trained model file.")
-    model_download_url = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE"
+    model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
 
     st.markdown(f'<div class="animated-button-container">{st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)}</div>', unsafe_allow_html=True)
 
