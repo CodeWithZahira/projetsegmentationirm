@@ -17,17 +17,26 @@ st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 # --- Background Image ---
 image_url = "https://images.pexels.com/photos/691668/pexels-photo-691668.jpeg"
 
-# --- Main CSS for Background, Fonts, and the NEW Button Animation ---
+# --- Combined CSS Block ---
 st.markdown(f"""
 <style>
-/* Registering the CSS variable for animation */
+/* --- Google Font Import --- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+/* --- CSS Variable for Button Animation --- */
 @property --a {{
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }}
 
-/* Main Background Image and Overlay */
+/* --- Base Body & Font Styling --- */
+body {{
+  font-family: 'Roboto' !important; 
+  color: white;
+}}
+
+/* --- Background Image and Overlay --- */
 .stApp {{
     background-image: url("{image_url}");
     background-size: cover;
@@ -40,49 +49,78 @@ st.markdown(f"""
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: linear-gradient(45deg, rgba(15, 32, 39, 0.9), rgba(32, 58, 67, 0.9), rgba(44, 83, 100, 0.9));
-    z-index: -1;
+    z-index: 0; /* Behind content but above background */
 }}
 
-/* General Text Color */
-h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
-    color: #FFFFFF !important;
+/* --- Magic Canvas for Particle Effects --- */
+#magic {{
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  display: block;
+  top: 0;
+  left: 0;
+  z-index: -1; /* Behind everything */
 }}
 
-/* --- NEW ANIMATED BUTTON STYLE --- */
-/* We create a container to hold the animation */
+/* --- NEW WELCOME SCREEN STYLES --- */
+.playground {{
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Align content to the bottom */
+  align-items: center;
+  text-align: center;
+  padding-bottom: 50px;
+}}
+.playground h1 {{
+    font-size: 3.5rem;
+    font-weight: 800;
+}}
+.playground .minText {{
+  font-size: 1.2rem;
+  color: #ccc;
+  max-width: 600px;
+}}
+.scroll-prompt {{
+    font-size: 2rem;
+    margin-top: 2rem;
+    animation: bounce 2s infinite;
+}}
+@keyframes bounce {{
+    0%, 20%, 50%, 80%, 100% {{ transform: translateY(0); }}
+    40% {{ transform: translateY(-20px); }}
+    60% {{ transform: translateY(-10px); }}
+}}
+
+
+/* --- ANIMATED BUTTON STYLES --- */
 .animated-button-container {{
     position: relative;
     display: inline-block;
-    padding: 3px; /* Space for the border to show */
-    border-radius: 50px; /* Match the button's border-radius */
+    padding: 3px;
+    border-radius: 50px;
     overflow: hidden;
     width: 100%;
     text-align: center;
+    margin-top: 1rem;
 }}
-
-/* The glowing, rotating border effect */
 .animated-button-container::before {{
     content: "";
     position: absolute;
-    z-index: -1;
+    z-index: 0;
     inset: -0.5em;
     border: solid 0.25em;
     border-image: conic-gradient(from var(--a), #7997e8, #f6d3ff, #7997e8) 1;
     filter: blur(0.25em);
     animation: rotateGlow 4s linear infinite;
 }}
+@keyframes rotateGlow {{ to {{ --a: 1turn; }} }}
 
-@keyframes rotateGlow {{
-  to {{
-    --a: 1turn;
-  }}
-}}
-
-/* Styling the actual Streamlit button inside the container */
 .animated-button-container .stButton>button, .animated-button-container .stLinkButton>a {{
     width: 100%;
     background: linear-gradient(45deg, #005c97, #363795);
-    color: white;
+    color: white !important;
     border-radius: 50px;
     padding: 15px 30px;
     font-size: 18px;
@@ -90,6 +128,8 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
     border: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
 }}
 .animated-button-container .stButton>button:hover, .animated-button-container .stLinkButton>a:hover {{
     transform: translateY(-2px);
@@ -97,51 +137,49 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
 }}
 
 
-/* --- NEW FOOTER SECTION STYLE --- */
+/* --- FOOTER SECTION STYLE --- */
 .footer-container {{
-    background: rgba(15, 32, 39, 0.8); /* Semi-transparent dark background */
+    background: rgba(15, 32, 39, 0.8);
     padding: 2rem;
     border-radius: 10px;
     margin-top: 4rem;
-    border-top: 1px solid #00c6ff; /* A nice top border to separate it */
+    border-top: 1px solid #00c6ff;
 }}
-.footer-container .footer {{
-    color: #ccc;
-    text-align: center;
-}}
-.footer-container .footer a {{
-    color: #00c6ff;
-    text-decoration: none;
-}}
+.footer-container .footer {{ color: #ccc; text-align: center; }}
+.footer-container .footer a {{ color: #00c6ff; text-decoration: none; }}
+
 </style>
 """, unsafe_allow_html=True)
 
 
 # =============================
-# 💬 WELCOME SECTION
+# 💬 WELCOME SCREEN
 # =============================
-with st.container():
-    col1, col2 = st.columns([1, 2], gap="large")
-    with col1:
-        com.iframe(
-            "https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie",
-            height=400
-        )
-    with col2:
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        st.markdown(
-            "<h1 style='text-align: center; color: #fff; font-family: sans-serif; font-weight: 800; font-size: 3.5rem;'>NeuroSeg</h1>",
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            "<p style='text-align: center; color:#ccc; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
-            unsafe_allow_html=True
-        )
+# --- Canvas for future JS animations ---
+st.markdown('<canvas id="magic"></canvas>', unsafe_allow_html=True)
 
+# --- New Welcome "Playground" Layout ---
+st.markdown("""
+<div class="playground">
+    <div style="width: 200px; margin-bottom: 2rem;">
+        <img src="https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.json" style="width:100%; display:none;">
+    </div>
+    <h1>NeuroSeg</h1>
+    <p class="minText">
+        An immersive journey into the future of medical imaging. 
+        Upload your model and MRI scan to experience the power of AI-driven segmentation.
+    </p>
+    <p class="scroll-prompt">↓</p>
+</div>
+""", unsafe_allow_html=True)
+# The Lottie animation is tricky to embed directly here with the iframe,
+# so we'll use a placeholder and focus on the layout. If needed, the com.iframe can be placed here.
+# For now, the clean text layout is prioritized.
 
 # =============================
 # 🚀 MAIN APPLICATION
 # =============================
+# (The rest of your application code remains the same)
 st.markdown("<br><hr><br>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2, gap="large")
@@ -151,7 +189,6 @@ with col1:
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE"
     
-    # --- Applying the animation to the Link Button ---
     st.markdown(f'<div class="animated-button-container"><a href="{model_download_url}" target="_blank" class="stLinkButton" style="display: block; text-decoration: none; color: white; padding: 15px 30px; border-radius: 50px; background: linear-gradient(45deg, #005c97, #363795);">⬇️ Download the Model (.tflite)</a></div>', unsafe_allow_html=True)
     
     st.markdown("---")
@@ -180,7 +217,6 @@ with col2:
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # --- Applying the animation to the regular Button ---
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation"):
         with st.spinner('Analyzing the image...'):
@@ -192,7 +228,6 @@ if model_loaded and image_file:
 # =============================
 # 🎓 ABOUT & CREDITS FOOTER
 # =============================
-# --- Applying the new footer container class ---
 st.markdown('<div class="footer-container">', unsafe_allow_html=True)
 
 logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/MIT_logo.svg/1200px-MIT_logo.svg.png"
@@ -219,7 +254,6 @@ st.markdown('</div>', unsafe_allow_html=True)
 # =============================
 # 📦 UTILITY FUNCTIONS
 # =============================
-# (Your utility functions remain the same)
 def preprocess_image(uploaded_file, target_size=(128, 128)):
     image = uploaded_file.convert("L")
     image = image.resize(target_size)
