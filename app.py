@@ -1,19 +1,19 @@
 import streamlit as st
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import tensorflow as tf
 import streamlit.components.v1 as com
 import cv2
 import tempfile
 import os
 from io import BytesIO
-from fpdf import FPDF  # pip install fpdf
+from fpdf import FPDF
 
 # =============================
 # 📦 UTILITY FUNCTIONS
 # =============================
+
 def preprocess_image(image_file, target_size=(128, 128)):
-    # image_file can be a file-like object or PIL Image
     if isinstance(image_file, Image.Image):
         image = image_file.convert("L")
     else:
@@ -63,39 +63,63 @@ def extract_frames_from_video(video_file, max_frames=30):
     os.remove(tmp_file_path)
     return frames
 
-def get_image_download_link(pil_img, filename="mask.png"):
+def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
+    # Convert mask array to PIL Image (grayscale)
+    mask_pil = Image.fromarray(mask).convert("L")
+    # Resize mask to original image size (if needed)
+    mask_pil = mask_pil.resize(original.size)
+    # Create a new image wide enough to hold both side by side
+    combined_width = original.width + mask_pil.width
+    combined_height = max(original.height, mask_pil.height)
+    combined_img = Image.new("RGB", (combined_width, combined_height))
+    # Convert original grayscale to RGB
+    original_rgb = original.convert("RGB")
+    combined_img.paste(original_rgb, (0, 0))
+    combined_img.paste(mask_pil.convert("RGB"), (original.width, 0))
+    # Add labels
+    draw = ImageDraw.Draw(combined_img)
+    font = ImageFont.load_default()
+    draw.text((10, 10), "MRI Scan", fill="red", font=font)
+    draw.text((original.width + 10, 10), "Segmentation Mask", fill="red", font=font)
+    return combined_img
+
+def get_combined_download_links(original, mask, idx):
+    combined_img = combine_images(original, mask)
+
+    # PNG download
     buffered = BytesIO()
-    pil_img.save(buffered, format="PNG")
-    img_bytes = buffered.getvalue()
-    return st.download_button(
-        label="📥 Download Mask as PNG",
-        data=img_bytes,
-        file_name=filename,
+    combined_img.save(buffered, format="PNG")
+    png_data = buffered.getvalue()
+    st.download_button(
+        label="📥 Download MRI + Mask as PNG",
+        data=png_data,
+        file_name=f"combined_{idx+1}.png",
         mime="image/png"
     )
 
-def get_pdf_download_link(pil_img, filename="mask.pdf"):
+    # PDF download
     pdf = FPDF()
     pdf.add_page()
     pdf_w, pdf_h = pdf.w - 2*pdf.l_margin, pdf.h - 2*pdf.t_margin
-    pil_img = pil_img.convert("RGB")
-    buffered = BytesIO()
-    pil_img.save(buffered, format="JPEG")
-    img_data = buffered.getvalue()
-    # Save image temporarily so FPDF can add it
+
+    buffered_pdf_img = BytesIO()
+    combined_img.save(buffered_pdf_img, format="JPEG")
+    buffered_pdf_img.seek(0)
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img_file:
-        tmp_img_file.write(img_data)
+        tmp_img_file.write(buffered_pdf_img.read())
         tmp_img_file_path = tmp_img_file.name
+
     pdf.image(tmp_img_file_path, x=pdf.l_margin, y=pdf.t_margin, w=pdf_w)
     pdf_output = pdf.output(dest="S").encode("latin1")
     os.remove(tmp_img_file_path)
-    return st.download_button(
-        label="📥 Download Mask as PDF",
+
+    st.download_button(
+        label="📥 Download MRI + Mask as PDF",
         data=pdf_output,
-        file_name=filename,
+        file_name=f"combined_{idx+1}.pdf",
         mime="application/pdf"
     )
-
 
 # =============================
 # 🔧 PAGE CONFIG
@@ -263,7 +287,7 @@ with col1:
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
     image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
-    video_file = st.file_uploader("Or upload an MRI Video (mp4, avi)", type=["mp4", "avi"], label_visibility="collapsed")
+    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
 
     all_images = []
     if image_files:
@@ -285,13 +309,15 @@ if model_loaded and all_images:
         for idx, item in enumerate(all_images):
             with st.spinner(f"Analyzing input {idx + 1}..."):
                 try:
-                    img_array, img_pil = preprocess_image(item)
+                    if isinstance(item, Image.Image):
+                        img_array, img_pil = preprocess_image(item)
+                    else:
+                        img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
                     display_prediction(img_pil, pred_mask)
 
-                    mask_pil = Image.fromarray(pred_mask)
-                    get_image_download_link(mask_pil, filename=f"mask_{idx+1}.png")
-                    get_pdf_download_link(mask_pil, filename=f"mask_{idx+1}.pdf")
+                    # Combined download links
+                    get_combined_download_links(img_pil, pred_mask, idx)
 
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
