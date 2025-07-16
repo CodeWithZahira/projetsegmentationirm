@@ -5,13 +5,28 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import io
 import streamlit.components.v1 as com
+
 # =============================
 # 🔧 PAGE CONFIG
 # =============================
-st.set_page_config(page_title="NeuroSeg Base", layout="centered")
-com.iframe("https://lottie.host/embed/f18f3de4-bd26-4c40-a8e8-4d57c67b5142/sQWEZtzUW3.lottie")
+st.set_page_config(page_title="NeuroSeg Base", layout="wide")  # 🌟 MODIF : layout wide
 
-
+# =============================
+# 💬 Bienvenue + Animation
+# =============================
+with st.container():
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.markdown(
+            "<h2 style='color:#fff; font-family:Arial;'>👋 Bienvenue sur NeuroSeg</h2>"
+            "<p style='color:#ccc; font-size:18px;'>Téléversez votre modèle et image IRM pour voir la magie de la segmentation en action !</p>",
+            unsafe_allow_html=True
+        )
+    with col2:
+        com.iframe(
+            "https://lottie.host/embed/f18f3de4-bd26-4c40-a8e8-4d57c67b5142/sQWEZtzUW3.lottie",
+            height=350 
+        )
 
 # =============================
 # 📦 UTILITIES
@@ -48,15 +63,9 @@ def display_prediction(image_pil, mask):
     st.image(buf)
 
 # =============================
-# 🧠 APP TITLE
-# =============================
-st.title("🧠 NeuroSeg - Segmentation IRM")
-
-st.markdown("Ce projet utilise un modèle TFLite pour segmenter les images IRM téléchargées.")
-
-# =============================
 # 📁 MODEL UPLOAD
 # =============================
+st.markdown("---")
 model_file = st.file_uploader("📁 Importer le modèle (.tflite)", type=["tflite"])
 model_loaded = False
 if model_file is not None:
