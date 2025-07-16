@@ -7,6 +7,37 @@ import io
 import streamlit.components.v1 as com
 
 # =============================
+# 📦 UTILITY FUNCTIONS
+# =============================
+
+def preprocess_image(image_file, target_size=(128, 128)):
+    image = Image.open(image_file).convert("L")
+    image = image.resize(target_size)
+    img_array = np.array(image) / 255.0
+    img_array = img_array.astype(np.float32)
+    img_array = np.expand_dims(img_array, axis=(0, -1))
+    return img_array, image
+
+def tflite_predict(interpreter, input_data):
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    interpreter.invoke()
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    prediction = output_data[0, :, :, 0]
+    prediction = (prediction > 0.5).astype(np.uint8) * 255
+    return prediction
+
+def display_prediction(image_pil, mask):
+    st.markdown("---")
+    st.subheader("Segmentation Result")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image(image_pil, caption="Original MRI Scan", use_container_width=True)
+    with col2:
+        st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
+
+# =============================
 # 🔧 PAGE CONFIG
 # =============================
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
@@ -159,7 +190,7 @@ with col2:
     st.markdown("Now, upload an MRI scan to perform segmentation.")
     image_file = st.file_uploader("Upload image", type=["png", "jpg", "jpeg", "tif", "tiff"], label_visibility="collapsed")
     if image_file:
-        st.image(image_file, caption="Uploaded MRI Scan", use_column_width=True)
+        st.image(image_file, caption="Uploaded MRI Scan", use_container_width=True)
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
@@ -195,33 +226,3 @@ with f_col2:
         unsafe_allow_html=True
     )
 st.markdown('</div>', unsafe_allow_html=True)
-
-# =============================
-# 📦 UTILITY FUNCTIONS
-# =============================
-def preprocess_image(image_file, target_size=(128, 128)):
-    image = Image.open(image_file).convert("L")
-    image = image.resize(target_size)
-    img_array = np.array(image) / 255.0
-    img_array = img_array.astype(np.float32)
-    img_array = np.expand_dims(img_array, axis=(0, -1))
-    return img_array, image
-
-def tflite_predict(interpreter, input_data):
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    interpreter.set_tensor(input_details[0]['index'], input_data)
-    interpreter.invoke()
-    output_data = interpreter.get_tensor(output_details[0]['index'])
-    prediction = output_data[0, :, :, 0]
-    prediction = (prediction > 0.5).astype(np.uint8) * 255
-    return prediction
-
-def display_prediction(image_pil, mask):
-    st.markdown("---")
-    st.subheader("Segmentation Result")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image(image_pil, caption="Original MRI Scan", use_column_width=True)
-    with col2:
-        st.image(mask, caption="Predicted Segmentation Mask", use_column_width=True)
