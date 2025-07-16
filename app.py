@@ -277,7 +277,7 @@ st.markdown("""
         </div>
     </div>
     <div class="footer-bottom">
-        <p>© 2025 Zahira Ellaouah</p>
+        <p>© 2025 Zahira Ellaouah – All rights reserved</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
