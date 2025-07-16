@@ -38,7 +38,33 @@ def display_prediction(image_pil, mask):
 # =============================
 # 🔧 PAGE CONFIG
 # =============================
-st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
+st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+<style>
+.neuroseg-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 0;
+    padding: 20px 0;
+    background: linear-gradient(90deg, #005c97, #363795, #005c97);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientSlide 5s ease infinite;
+}
+
+@keyframes gradientSlide {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+</style>
+
+<h1 class="neuroseg-title">NeuroSeg</h1>
+""", unsafe_allow_html=True)
 
 # =============================
 # 🎨 STYLING & BACKGROUND
