@@ -36,10 +36,14 @@ page_bg_img = f"""
     background: linear-gradient(45deg, rgba(15, 32, 39, 0.85), rgba(32, 58, 67, 0.85), rgba(44, 83, 100, 0.85));
     z-index: -1;
 }}
-/* Style the sidebar */
-[data-testid="stSidebar"] > div:first-child {{
-    background: linear-gradient(20deg, rgb(15 32 39 / 85%), rgb(32 58 67 / 85%));
-    color: white;
+/* Footer styling */
+.footer {{
+    color: #ccc;
+    text-align: center;
+}}
+.footer a {{
+    color: #00c6ff;
+    text-decoration: none;
 }}
 </style>
 """
@@ -48,7 +52,7 @@ st.markdown(page_bg_img, unsafe_allow_html=True)
 st.markdown("""
 <style>
 /* General Font and Color Styles */
-h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader {
+h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader, .stLinkButton {
     color: #FFFFFF !important;
 }
 
@@ -82,28 +86,6 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader {
 
 
 # =============================
-# 👤 SIDEBAR - ABOUT & CREDITS
-# =============================
-# --- Replace this with the URL of your university's logo ---
-logo_url = "https://www.uca.ma/public/files/images/site-159-09ccd13bdac13d0d067f6c29cd636c58-1518715952.png"
-
-st.sidebar.image(logo_url, width=150)
-st.sidebar.title("About this Project")
-st.sidebar.markdown("---")
-
-st.sidebar.header("Author")
-st.sidebar.write("👤 **Name:** [ELLAOUAH Zahira]")
-st.sidebar.write("📧 **Email:** [zahiraellaouah@gmail.com]")
-st.sidebar.markdown("---")
-
-st.sidebar.header("Supervisors")
-st.sidebar.write("👨‍🏫 **Supervisor 1:** [Professor OUMGHAR Nezha]")
-st.sidebar.write("👨‍🏫 **Supervisor 2:** [Professor CHADI Mohammed Amine]")
-st.sidebar.markdown("---")
-st.sidebar.info("This application was developed as part of a research project at Faculty of Medicine and Pharmacy of Marrakech")
-
-
-# =============================
 # 💬 Bienvenue + Animation
 # =============================
 with st.container():
@@ -114,7 +96,7 @@ with st.container():
             height=400
         )
     with col2:
-        st.markdown("<br><br>", unsafe_allow_html=True) # Vertical alignment
+        st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown(
             "<h1 style='text-align: center; color: #fff; font-family: sans-serif; font-weight: 800; font-size: 3.5rem;'>NeuroSeg</h1>",
             unsafe_allow_html=True
@@ -137,6 +119,7 @@ def preprocess_image(uploaded_file, target_size=(128, 128)):
     return img_array, image
 
 def tflite_predict(interpreter, input_data):
+    # (Your function remains the same)
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
     interpreter.set_tensor(input_details[0]['index'], input_data)
@@ -147,6 +130,7 @@ def tflite_predict(interpreter, input_data):
     return prediction
 
 def display_prediction(image_pil, mask):
+    # (Your function remains the same)
     st.markdown("---")
     st.subheader("Segmentation Result")
     col1, col2 = st.columns(2)
@@ -163,8 +147,18 @@ st.markdown("<br><hr><br>", unsafe_allow_html=True)
 col1, col2 = st.columns(2, gap="large")
 
 with col1:
-    st.header("1. Upload Model")
-    model_file = st.file_uploader("📁 Import your .tflite model", type=["tflite"])
+    st.header("1. Get & Upload Model")
+    st.markdown("First, download the pre-trained model file.")
+    
+    # --- PASTE YOUR GOOGLE DRIVE DIRECT DOWNLOAD LINK HERE ---
+    model_download_url = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE" 
+    
+    st.link_button("⬇️ Download the Model (.tflite)", model_download_url)
+    
+    st.markdown("---")
+    st.markdown("Then, upload the downloaded file here:")
+    model_file = st.file_uploader("📁 Import your .tflite model", type=["tflite"], label_visibility="collapsed")
+    
     model_loaded = False
     interpreter = None
     if model_file is not None:
@@ -179,13 +173,14 @@ with col1:
 
 with col2:
     st.header("2. Upload Image")
-    image_file = st.file_uploader("🖼️ Import an MRI image (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
+    st.markdown("Now, upload an MRI scan to perform segmentation.")
+    image_file = st.file_uploader("🖼️ Import an MRI image (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"], label_visibility="collapsed")
     if image_file:
         st.image(image_file, caption="Uploaded MRI Scan", use_column_width=True)
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
-    col_center, _, _ = st.columns([1,1,1]) # Centering the button
+    col_center, _, _ = st.columns([1,1,1])
     with col_center:
         if st.button("🔍 Perform Segmentation"):
             with st.spinner('Analyzing the image...'):
@@ -193,5 +188,29 @@ if model_loaded and image_file:
                 pred_mask = tflite_predict(interpreter, img_array)
                 display_prediction(img_pil, pred_mask)
 
-st.markdown("<br><br><br>", unsafe_allow_html=True)
-st.info("This is a demo application. The accuracy of the segmentation depends on the trained model.")
+# =============================
+# 🎓 ABOUT & CREDITS FOOTER
+# =============================
+st.markdown("<br><br><br><hr>", unsafe_allow_html=True)
+
+# --- Replace with your university's logo URL and details ---
+logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/MIT_logo.svg/1200px-MIT_logo.svg.png" # Example: MIT Logo
+
+with st.container():
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.markdown(f'<div style="text-align: center; padding-top: 20px;"><img src="{logo_url}" width="100"></div>', unsafe_allow_html=True)
+        st.markdown("<p class='footer'>[Your University Name]</p>", unsafe_allow_html=True)
+        
+    with col2:
+        st.markdown(
+            """
+            <div class="footer">
+                <h4>Developed By</h4>
+                <p>👤 [Your Name Here] | <a href="mailto:[your.email@university.edu]">📧 [your.email@university.edu]</a></p>
+                <h4>Under the Supervision of</h4>
+                <p>👨‍🏫 [Professor 1 Name]     👨‍🏫 [Professor 2 Name]</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
