@@ -211,7 +211,7 @@ logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Ap
 
 f_col1, f_col2 = st.columns([1, 2])
 with f_col1:
-    st.markdown(f'<div style="text-align: center; padding-top: 20px;"><img src="{logo_url}" width="100"></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="text-align: center; padding-top: 20px;"><img src="{logo_url}" width="150"></div>', unsafe_allow_html=True)
     st.markdown("<p class='footer'>Cadi Ayyad University, Faculties of Medicine and Pharmacie</p>", unsafe_allow_html=True)
 with f_col2:
     st.markdown(
