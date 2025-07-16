@@ -24,9 +24,7 @@ with st.container():
         )
     with col2:
         com.iframe(
-            "https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie",
-            height=600px, 
-            width=700px
+            "https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie"
         )
 
 # =============================
