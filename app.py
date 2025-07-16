@@ -162,7 +162,7 @@ with st.container():
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown('<h1 class="animated-title">NeuroSeg</h1>', unsafe_allow_html=True)
         st.markdown(
-            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan to experience the power of AI-driven segmentation.</p>",
+            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan(s) to experience the power of AI-driven segmentation.</p>",
             unsafe_allow_html=True
         )
 
@@ -199,20 +199,30 @@ with col1:
             st.error(f"❌ Error loading model: {e}")
 
 with col2:
-    st.header("2. Upload Image")
-    st.markdown("Now, upload an MRI scan to perform segmentation.")
-    image_file = st.file_uploader("Upload image", type=["png", "jpg", "jpeg", "tif", "tiff"], label_visibility="collapsed")
-    if image_file:
-        st.image(image_file, caption="Uploaded MRI Scan", use_container_width=True)
+    st.header("2. Upload MRI Image(s)")
+    st.markdown("Now, upload one or more MRI scans:")
+    image_files = st.file_uploader(
+        "Upload MRI Images", 
+        type=["png", "jpg", "jpeg", "tif", "tiff"], 
+        label_visibility="collapsed", 
+        accept_multiple_files=True
+    )
+    if image_files:
+        for file in image_files:
+            st.image(file, caption=file.name, use_container_width=True)
 
-if model_loaded and image_file:
+if model_loaded and image_files:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
-    if st.button("🔍 Perform Segmentation", use_container_width=True):
-        with st.spinner('Analyzing the image...'):
-            img_array, img_pil = preprocess_image(image_file)
-            pred_mask = tflite_predict(interpreter, img_array)
-            display_prediction(img_pil, pred_mask)
+    if st.button("🔍 Perform Segmentation for All Images", use_container_width=True):
+        for idx, image_file in enumerate(image_files):
+            with st.spinner(f"Analyzing image {idx + 1}..."):
+                try:
+                    img_array, img_pil = preprocess_image(image_file)
+                    pred_mask = tflite_predict(interpreter, img_array)
+                    display_prediction(img_pil, pred_mask)
+                except Exception as e:
+                    st.error(f"❌ Error with image {image_file.name}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
