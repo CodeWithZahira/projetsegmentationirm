@@ -15,7 +15,7 @@ st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 # 🎨 STYLING & ASSETS
 # =============================
 # --- Background Image ---
-image_url = "https://static.vecteezy.com/system/resources/previews/014/551/268/original/abstract-geometric-white-and-gray-color-background-illustration-background-can-be-used-in-cover-design-book-design-poster-cd-cover-flyer-website-backgrounds-or-advertising-vector.jpg"
+image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 # --- Main CSS for Background, Fonts, and the NEW Button Animation ---
 st.markdown(f"""
 <style>
