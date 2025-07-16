@@ -211,7 +211,7 @@ if model_loaded and image_file:
 # =============================
 # 🎓 ABOUT & CREDITS FOOTER
 # =============================
-st.markdown('<div class="custom-footer-box">', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"
 
