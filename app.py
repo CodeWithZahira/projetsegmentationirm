@@ -9,7 +9,7 @@ import streamlit.components.v1 as com
 # =============================
 # 🔧 PAGE CONFIG
 # =============================
-st.set_page_config(page_title="NeuroSeg Base")  
+st.set_page_config(page_title="NeuroSeg Base", color = black)  
 
 # =============================
 # 💬 Bienvenue + Animation
