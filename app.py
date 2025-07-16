@@ -3,7 +3,6 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 import streamlit.components.v1 as com
-import base64
 
 # =============================
 # 📦 UTILITY FUNCTIONS
@@ -42,49 +41,77 @@ def display_prediction(image_pil, mask):
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 🎨 STYLING & HEADER
+# 🎨 STYLING & BACKGROUND + TITLE ANIMATION
 # =============================
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
-logo_url = "https://www.medramch.com/wp-content/uploads/2022/06/logo-fmpm-300x136.png"  # logo de la faculté
-
 st.markdown(f"""
 <style>
+@property --a {{
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}}
+
 .stApp {{
-    background-image: url('{image_url}');
+    background-image: url("{image_url}");
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
     background-repeat: no-repeat;
+    background-attachment: fixed;
 }}
 .stApp::before {{
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(45deg, rgba(255,255,255,0.8), rgba(255,255,255,0.8));
+    background: linear-gradient(45deg, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
     z-index: -1;
 }}
 
-.header-container {{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(to right, #999, #fff);
-    padding: 10px 30px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}}
-.header-container img {{
-    height: 60px;
-}}
-.header-title {{
-    font-size: 2.5rem;
-    font-weight: bold;
-    text-align: center;
-    flex: 1;
-    color: black;
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
+    color: black !important;
 }}
 
-/* Animated Title */
+/* Animated Button */
+.animated-button-container {{
+    position: relative;
+    display: inline-block;
+    padding: 3px;
+    border-radius: 50px;
+    overflow: hidden;
+    width: 100%;
+    text-align: center;
+}}
+.animated-button-container::before {{
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -0.5em;
+    border: solid 0.25em;
+    border-image: conic-gradient(from var(--a), #7997e8, #f6d3ff, #7997e8) 1;
+    filter: blur(0.25em);
+    animation: rotateGlow 4s linear infinite;
+}}
+@keyframes rotateGlow {{
+  to {{ --a: 1turn; }}
+}}
+.animated-button-container .stButton>button {{
+    width: 100%;
+    background: linear-gradient(45deg, #005c97, #363795);
+    color: black !important;
+    border-radius: 50px;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}}
+.animated-button-container .stButton>button:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}}
+
+/* 🔥 BIG Attention-Grabbing Title Animation */
 @keyframes glowBounce {{
   0%, 100% {{
     color: #005c97;
@@ -107,6 +134,7 @@ st.markdown(f"""
     transform: translateY(-20px) scale(1.15);
   }}
 }}
+
 .animated-title {{
   font-family: 'Roboto', sans-serif;
   font-weight: 900;
@@ -118,11 +146,6 @@ st.markdown(f"""
   cursor: default;
 }}
 </style>
-<div class="header-container">
-    <img src="{logo_url}" alt="Faculty Logo">
-    <div class="header-title">About</div>
-    <div><input type="text" placeholder="🔍 Search" style="padding:5px 10px;border-radius:5px;"></div>
-</div>
 """, unsafe_allow_html=True)
 
 # =============================
@@ -155,7 +178,10 @@ with col1:
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
 
+    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
     model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
@@ -181,11 +207,13 @@ with col2:
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation", use_container_width=True):
         with st.spinner('Analyzing the image...'):
             img_array, img_pil = preprocess_image(image_file)
             pred_mask = tflite_predict(interpreter, img_array)
             display_prediction(img_pil, pred_mask)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
 # 🎓 FOOTER
@@ -229,6 +257,7 @@ st.markdown("""
     padding-top: 15px;
 }
 </style>
+
 <div class="booking-style-footer">
     <div class="footer-columns">
         <div class="footer-column">
