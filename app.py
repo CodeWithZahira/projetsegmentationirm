@@ -255,33 +255,32 @@ st.markdown("""
 <div class="booking-style-footer">
     <div class="footer-columns">
         <div class="footer-column">
-            <h4>Développé par</h4>
+            <h4>Developed By</h4>
             <p>Zahira ELLAOUAH</p>
             <p><a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
         </div>
         <div class="footer-column">
-            <h4>Encadré par</h4>
-            <p>Pr. Nezha Oumghar</p>
-            <p>Pr. Mohamed Amine Chadi</p>
+            <h4>Supervised By</h4>
+            <p>Prof. Nezha Oumghar</p>
+            <p>Prof. Mohamed Amine Chadi</p>
         </div>
         <div class="footer-column">
-            <h4>Université</h4>
-            <p>Université Cadi Ayyad</p>
-            <p>Faculté de Médecine et de Pharmacie</p>
-            <p>Marrakech</p>
+            <h4>University</h4>
+            <p>Cadi Ayyad University</p>
+            <p>Faculty of Medicine and Pharmacy</p>
+            <p>Marrakesh</p>
         </div>
         <div class="footer-column">
-            <h4>Projet</h4>
-            <p>Segmentation automatique des IRM</p>
-            <p>Master en Ingénierie Biomédicale</p>
+            <h4>Project</h4>
+            <p>Automatic Brain MRI Segmentation</p>
+            <p>Master in Biomedical Engineering</p>
         </div>
     </div>
     <div class="footer-bottom">
-        <p>© 2025 Zahira Ellaouah – Tous droits réservés</p>
+        <p>© 2025 Zahira Ellaouah</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
-
 
 
 
