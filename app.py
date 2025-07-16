@@ -14,19 +14,15 @@ st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 # =============================
 # 🎨 STYLING & ASSETS
 # =============================
-# --- Background Image ---
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
-# --- Main CSS for Background, Fonts, and the NEW Button Animation ---
 st.markdown(f"""
 <style>
-/* Registering the CSS variable for animation */
 @property --a {{
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }}
 
-/* Main Background Image and Overlay */
 .stApp {{
     background-image: url("{image_url}");
     background-size: cover;
@@ -42,24 +38,19 @@ st.markdown(f"""
     z-index: -1;
 }}
 
-/* General Text Color */
 h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
     color: #FFFFFF !important;
 }}
 
-/* --- NEW ANIMATED BUTTON STYLE --- */
-/* We create a container to hold the animation */
 .animated-button-container {{
     position: relative;
     display: inline-block;
-    padding: 3px; /* Space for the border to show */
-    border-radius: 50px; /* Match the button's border-radius */
+    padding: 3px;
+    border-radius: 50px;
     overflow: hidden;
     width: 100%;
     text-align: center;
 }}
-
-/* The glowing, rotating border effect */
 .animated-button-container::before {{
     content: "";
     position: absolute;
@@ -77,7 +68,6 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
   }}
 }}
 
-/* Styling the actual Streamlit button inside the container */
 .animated-button-container .stButton>button, .animated-button-container .stLinkButton>a {{
     width: 100%;
     background: linear-gradient(45deg, #005c97, #363795);
@@ -95,14 +85,12 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
-
-/* --- NEW FOOTER SECTION STYLE --- */
 .footer-container {{
-    background: rgba(15, 32, 39, 0.8); /* Semi-transparent dark background */
+    background: rgba(15, 32, 39, 0.8);
     padding: 2rem;
     border-radius: 10px;
     margin-top: 4rem;
-    border-top: 1px solid #00c6ff; /* A nice top border to separate it */
+    border-top: 1px solid #00c6ff;
 }}
 .footer-container .footer {{
     color: #ccc;
@@ -114,7 +102,6 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader label {{
 }}
 </style>
 """, unsafe_allow_html=True)
-
 
 # =============================
 # 💬 WELCOME SECTION
@@ -137,7 +124,6 @@ with st.container():
             unsafe_allow_html=True
         )
 
-
 # =============================
 # 🚀 MAIN APPLICATION
 # =============================
@@ -150,7 +136,6 @@ with col1:
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE"
     
-    # --- Applying the animation to the Link Button ---
     st.markdown(f'<div class="animated-button-container"><a href="{model_download_url}" target="_blank" class="stLinkButton" style="display: block; text-decoration: none; color: white; padding: 15px 30px; border-radius: 50px; background: linear-gradient(45deg, #005c97, #363795);">⬇️ Download the Model (.tflite)</a></div>', unsafe_allow_html=True)
     
     st.markdown("---")
@@ -178,12 +163,10 @@ with col2:
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # --- Applying the animation to the regular Button ---
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation"):
         with st.spinner('Analyzing the image...'):
-            img_array, img_pil = preprocess_image(Image.open(image_file))
+            img_array, img_pil = preprocess_image(image_file)
             pred_mask = tflite_predict(interpreter, img_array)
             display_prediction(img_pil, pred_mask)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -191,7 +174,6 @@ if model_loaded and image_file:
 # =============================
 # 🎓 ABOUT & CREDITS FOOTER
 # =============================
-# --- Applying the new footer container class ---
 st.markdown('<div class="footer-container">', unsafe_allow_html=True)
 
 logo_url = "https://tse2.mm.bing.net/th/id/OIP.WC5xs7MJrmfk_YEHDn6BOAAAAA?pid=Api&P=0&h=180"
@@ -214,13 +196,11 @@ with f_col2:
     )
 st.markdown('</div>', unsafe_allow_html=True)
 
-
 # =============================
 # 📦 UTILITY FUNCTIONS
 # =============================
-# (Your utility functions remain the same)
-def preprocess_image(uploaded_file, target_size=(128, 128)):
-    image = uploaded_file.convert("L")
+def preprocess_image(image_file, target_size=(128, 128)):
+    image = Image.open(image_file).convert("L")
     image = image.resize(target_size)
     img_array = np.array(image) / 255.0
     img_array = img_array.astype(np.float32)
@@ -245,4 +225,3 @@ def display_prediction(image_pil, mask):
         st.image(image_pil, caption="Original MRI Scan", use_column_width=True)
     with col2:
         st.image(mask, caption="Predicted Segmentation Mask", use_column_width=True)
-        
