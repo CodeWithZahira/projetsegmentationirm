@@ -267,8 +267,8 @@ st.markdown("""
         </div>
         <div class="footer-column">
             <h4>Supervised By</h4>
-            <p>Prof. Nezha Oumghar</p>
-            <p>Prof. Mohamed Amine Chadi</p>
+            <p>Pr. Nezha Oumghar</p>
+            <p>Pr. Mohamed Amine Chadi</p>
         </div>
         <div class="footer-column">
             <h4>University</h4>
