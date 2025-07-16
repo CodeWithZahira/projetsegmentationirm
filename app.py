@@ -16,7 +16,7 @@ st.set_page_config(page_title="NeuroSeg Advanced", layout="wide")
 # =============================
 # I've replaced the local file logic with a direct URL.
 # Replace this URL with the one you copied from Google or another image source.
-image_url = "https://static.vecteezy.com/system/resources/previews/020/328/693/original/3d-white-particle-wave-pattern-on-a-black-background-digital-abstract-background-can-be-applied-for-web-design-website-wallpaper-banner-or-cover-illustration-vector.jpg" 
+image_url = "https://png.pngtree.com/thumb_back/fh260/background/20231006/pngtree-isolated-background-3d-render-of-a-white-brain-image_13562186.png" 
 
 page_bg_img = f"""
 <style>
