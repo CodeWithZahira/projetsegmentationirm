@@ -2,8 +2,6 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import io
 import streamlit.components.v1 as com
 
 # =============================
@@ -43,19 +41,17 @@ def display_prediction(image_pil, mask):
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 🎨 STYLING & ASSETS (Consolidated)
+# 🎨 STYLING & BACKGROUND
 # =============================
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
 <style>
-/* CSS Variable for Animation */
 @property --a {{
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }}
 
-/* General App and Font Styling */
 .stApp {{
     background-image: url("{image_url}");
     background-size: cover;
@@ -76,7 +72,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     color: black !important;
 }}
 
-/* Animated Button Styling */
+/* Animated Button */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -99,7 +95,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 @keyframes rotateGlow {{
   to {{ --a: 1turn; }}
 }}
-.animated-button-container .stButton>button, .st-emotion-cache-19n6j20 a {{
+.animated-button-container .stButton>button {{
     width: 100%;
     background: linear-gradient(45deg, #005c97, #363795);
     color: black !important;
@@ -110,31 +106,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     border: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    text-decoration: none;
 }}
-.animated-button-container .stButton>button:hover, .st-emotion-cache-19n6j20 a:hover {{
+.animated-button-container .stButton>button:hover {{
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}}
-
-/* --- Custom Footer Styling (FIXED) --- */
-.custom-footer-box {{
-    background: rgba(255, 255, 255, 0.6);
-    padding: 30px;
-    border-radius: 15px;
-    border: 1px solid #00c6ff;
-    margin-top: 4rem;
-    overflow: auto;
-}}
-.custom-footer-box h4 {{
-    margin-bottom: 10px;
-}}
-.custom-footer-box a {{
-    color: #007acc !important;
-    text-decoration: none;
-}}
-.custom-footer-box img {{
-    border-radius: 8px;
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -172,7 +147,10 @@ with col1:
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=1O2pcseTkdmgO_424pGfk636kT0_T36v8"
 
-    st.markdown(f'<div class="animated-button-container">{st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)}</div>', unsafe_allow_html=True)
+    # ✅ Fixed usage of button inside styled div
+    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
+    st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
@@ -199,7 +177,6 @@ with col2:
 
 if model_loaded and image_file:
     st.markdown("<br>", unsafe_allow_html=True)
-
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation", use_container_width=True):
         with st.spinner('Analyzing the image...'):
@@ -209,9 +186,8 @@ if model_loaded and image_file:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
-# 🎓 ABOUT & CREDITS FOOTER
+# 🎓 BOOKING.COM STYLE FOOTER
 # =============================
-
 st.markdown("""
 <style>
 .booking-style-footer {
@@ -281,15 +257,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
-
