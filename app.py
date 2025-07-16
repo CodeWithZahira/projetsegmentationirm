@@ -6,19 +6,19 @@ import matplotlib.pyplot as plt
 import io
 
 # =============================
-# 🎨 PAGE CONFIG
+# 🔧 PAGE CONFIG
 # =============================
-st.set_page_config(page_title="NeuroSeg", layout="wide")
+st.set_page_config(page_title="NeuroSeg Base", layout="centered")
 
 # =============================
-# 🔧 UTILITIES
+# 📦 UTILITIES
 # =============================
 def preprocess_image(uploaded_file, target_size=(128, 128)):
     image = Image.open(uploaded_file).convert("L")
     image = image.resize(target_size)
     img_array = np.array(image) / 255.0
     img_array = img_array.astype(np.float32)
-    img_array = np.expand_dims(img_array, axis=(0, -1))
+    img_array = np.expand_dims(img_array, axis=(0, -1))  # Shape: (1, H, W, 1)
     return img_array, image
 
 def tflite_predict(interpreter, input_data):
@@ -45,179 +45,34 @@ def display_prediction(image_pil, mask):
     st.image(buf)
 
 # =============================
-# 🌈 STYLES & ANIMATIONS
+# 🧠 APP TITLE
 # =============================
-st.markdown("""
-    <style>
-    html, body, .stApp {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', sans-serif;
-        scroll-behavior: smooth;
-    }
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background-color: rgba(0, 0, 0, 0.85);
-        padding: 1rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 9999;
-    }
-    .navbar a {
-        color: white;
-        margin: 0 15px;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 16px;
-    }
-    .navbar a:hover {
-        text-decoration: underline;
-    }
-    .logo-img {
-        height: 40px;
-    }
-    .section {
-        height: 100vh;
-        padding: 100px 40px;
-        color: white;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        animation: fadeIn 2s ease-in-out;
-        background-attachment: fixed;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
-    #home {
-        background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(10,10,10,0.8)),
-                    url('https://wallpaperbat.com/img/6790-robotics-wallpaper.jpg') no-repeat center center;
-    }
-    #predict {
-        background: linear-gradient(to bottom right, rgba(0,0,0,0.6), rgba(34,34,34,0.9)),
-                    url('https://img.freepik.com/premium-photo/human-brain-3d-illustration-brainstorming-conceptgenerative-ai_841229-1720.jpg') no-repeat center center;
-    }
-    #about {
-        background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(30,30,30,0.85)),
-                    url('https://thumbs.dreamstime.com/b/modern-friendly-robot-artificial-intelligence-greets-raising-his-hand-saying-hello-hallway-office-many-330419098.jpg') no-repeat center center;
-    }
-    h1.animated-title {
-        font-size: 3.5em;
-        animation: floatUp 6s infinite;
-        color: white;
-        text-align: left;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(10px); opacity: 0.8; }
-      50% { transform: translateY(0px); opacity: 1; }
-      100% { transform: translateY(10px); opacity: 0.8; }
-    }
-    @keyframes fadeIn {
-        from {opacity: 0;}
-        to {opacity: 1;}
-    }
-    .btn-main {
-        background-color: #FF4B4B;
-        padding: 10px 25px;
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 25px;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 20px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+st.title("🧠 NeuroSeg - Segmentation IRM")
+
+st.markdown("Ce projet utilise un modèle TFLite pour segmenter les images IRM téléchargées.")
 
 # =============================
-# 🔝 NAVBAR
+# 📁 MODEL UPLOAD
 # =============================
-st.markdown("""
-<div class="navbar">
-  <img src="http://www.fmpm.uca.ma/wp-content/uploads/2024/04/logofm-1.png" class="logo-img" alt="University Logo">
-  <div>
-    <a href="#home">Accueil</a>
-    <a href="#predict">Prédiction</a>
-    <a href="#about">Contact</a>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-# =============================
-# 🏠 SECTION: HOME
-# =============================
-st.markdown("""
-<section id="home" class="section">
-  <h1 class="animated-title">Bienvenue</h1>
-  <h1 class="animated-title">sur NeuroSeg</h1>
-  <h3 style="color:white; text-align: left;">Application de segmentation IRM basée sur l'IA</h3>
-  <p style="color:white; text-align: left;">Créée par Zahira ELLAOUAH</p>
-  <a href="#predict"><button class="btn-main">Commencer</button></a>
-</section>
-""", unsafe_allow_html=True)
-
-# =============================
-# 🧠 SECTION: PREDICTION
-# =============================
-st.markdown("""
-<section id="predict" class="section">
-  <h2>🧠 Téléversez et prédisez</h2>
-""", unsafe_allow_html=True)
-
-model_file = st.file_uploader("Modèle TFLite (.tflite)", type=["tflite"])
+model_file = st.file_uploader("📁 Importer le modèle (.tflite)", type=["tflite"])
 model_loaded = False
 if model_file is not None:
     try:
         tflite_model = model_file.read()
         interpreter = tf.lite.Interpreter(model_content=tflite_model)
         interpreter.allocate_tensors()
-        st.success("✅ Modèle chargé")
+        st.success("✅ Modèle chargé avec succès.")
         model_loaded = True
     except Exception as e:
-        st.error(f"❌ Erreur: {e}")
+        st.error(f"❌ Erreur lors du chargement du modèle : {e}")
 
-image_file = st.file_uploader("Image IRM (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
+# =============================
+# 🖼️ IMAGE UPLOAD & PREDICTION
+# =============================
+image_file = st.file_uploader("🖼️ Importer une image IRM (PNG/JPG/TIF)", type=["png", "jpg", "jpeg", "tif", "tiff"])
 if image_file and model_loaded:
     img_array, img_pil = preprocess_image(image_file)
     st.image(img_pil, caption="Image originale", use_column_width=True)
     if st.button("🔍 Prédire"):
         pred_mask = tflite_predict(interpreter, img_array)
         display_prediction(img_pil, pred_mask)
-
-# 3D Brain Model
-st.markdown("""
-<h3 style="color:white">🧠 Modèle 3D de cerveau</h3>
-<iframe title="3D Brain" frameborder="0" allowfullscreen
-        mozallowfullscreen="true" webkitallowfullscreen="true"
-        allow="autoplay; fullscreen; xr-spatial-tracking"
-        xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share
-        width="640" height="480"
-        src="https://sketchfab.com/models/327caa38dbef4bc9a7c7e3a16ed7e1cb/embed">
-</iframe>
-</section>
-""", unsafe_allow_html=True)
-
-# =============================
-# ℹ️ SECTION: CONTACT
-# =============================
-st.markdown("""
-<section id="about" class="section">
-  <h2>📞 Contact</h2>
-  <p>Email: <a style="color:white" href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
-  <p style="color:white">Développé dans le cadre du Master en Ingénierie Biomédicale - Université Cadi Ayyad FMPM</p>
-</section>
-""", unsafe_allow_html=True)
-
-# =============================
-# 🔻 FOOTER
-# =============================
-st.markdown("""
-<hr>
-<p style='text-align: center; color: black;'>© 2025 NeuroSeg. Made by Zahira.</p>
-""", unsafe_allow_html=True)
