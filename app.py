@@ -73,74 +73,44 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 }}
 
 /* Animated Button */
-.animated-button-container {{
-    position: relative;
-    display: inline-block;
-    padding: 3px;
-    border-radius: 50px;
-    overflow: hidden;
-    width: 100%;
-    text-align: center;
-}}
-.animated-button-container::before {{
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: -0.5em;
-    border: solid 0.25em;
-    border-image: conic-gradient(from var(--a), #7997e8, #f6d3ff, #7997e8) 1;
-    filter: blur(0.25em);
-    animation: rotateGlow 4s linear infinite;
-}}
-@keyframes rotateGlow {{
-  to {{ --a: 1turn; }}
-}}
-.animated-button-container .stButton>button {{
-    width: 100%;
-    background: linear-gradient(45deg, #005c97, #363795);
-    color: black !important;
-    border-radius: 50px;
-    padding: 15px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}}
-.animated-button-container .stButton>button:hover {{
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}}
-
-/* Cute pulsing animation for title */
-@keyframes pulse {{
-  0% {{
+st.markdown(f"""
+<style>
+@keyframes glowBounce {{
+  0%, 100% {{
     color: #005c97;
-    transform: scale(1);
-    text-shadow: 0 0 5px #7997e8;
+    text-shadow:
+      0 0 5px #7997e8,
+      0 0 10px #7997e8,
+      0 0 20px #7997e8,
+      0 0 40px #f6d3ff,
+      0 0 80px #f6d3ff;
+    transform: translateY(0) scale(1);
   }}
   50% {{
     color: #f6d3ff;
-    transform: scale(1.1);
-    text-shadow: 0 0 20px #f6d3ff;
-  }}
-  100% {{
-    color: #005c97;
-    transform: scale(1);
-    text-shadow: 0 0 5px #7997e8;
+    text-shadow:
+      0 0 10px #f6d3ff,
+      0 0 20px #f6d3ff,
+      0 0 30px #f6d3ff,
+      0 0 60px #7997e8,
+      0 0 90px #7997e8;
+    transform: translateY(-20px) scale(1.15);
   }}
 }}
 
 .animated-title {{
   font-family: 'Roboto', sans-serif;
-  font-weight: 800;
-  font-size: 3.5rem;
+  font-weight: 900;
+  font-size: 5rem;
   text-align: center;
-  animation: pulse 3s ease-in-out infinite;
+  animation: glowBounce 2.5s ease-in-out infinite;
   user-select: none;
   margin-bottom: 0.5rem;
+  cursor: default;
 }}
 </style>
+
+<h1 class="animated-title">NeuroSeg</h1>
 """, unsafe_allow_html=True)
 
 # =============================
