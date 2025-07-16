@@ -24,7 +24,7 @@ def get_base64_of_bin_file(bin_file):
 # You can download a suitable image from sites like Unsplash or Pexels.
 # For this example, I'll assume you have an image named 'background.jpg' in the same directory.
 # As a placeholder, let's create a dummy file. In a real scenario, you'd have your own image.
-with open("background.jpg", "w") as f:
+with open("https://static.vecteezy.com/system/resources/previews/014/551/268/original/abstract-geometric-white-and-gray-color-background-illustration-background-can-be-used-in-cover-design-book-design-poster-cd-cover-flyer-website-backgrounds-or-advertising-vector.jpg", "w") as f:
     f.write("dummy background image")
 
 try:
