@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 import streamlit.components.v1 as com
+import base64
 
 # =============================
 # 📦 UTILITY FUNCTIONS
@@ -41,43 +42,86 @@ def display_prediction(image_pil, mask):
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 📌 CUSTOM HEADER WITH LOGO
+# 🎨 STYLING & HEADER
 # =============================
+image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
+logo_url = "https://www.medramch.com/wp-content/uploads/2022/06/logo-fmpm-300x136.png"  # logo de la faculté
+
 st.markdown(f"""
 <style>
-.custom-header {{
-    background: linear-gradient(to right, #cccccc, white);
-    padding: 10px 30px;
+.stApp {{
+    background-image: url('{image_url}');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}}
+.stApp::before {{
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.8), rgba(255,255,255,0.8));
+    z-index: -1;
+}}
+
+.header-container {{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: linear-gradient(to right, #999, #fff);
+    padding: 10px 30px;
+    border-radius: 12px;
+    margin-bottom: 20px;
 }}
-.custom-header img {{
+.header-container img {{
     height: 60px;
 }}
-.custom-header h1 {{
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-    flex: 1;
+.header-title {{
+    font-size: 2.5rem;
+    font-weight: bold;
     text-align: center;
+    flex: 1;
     color: black;
 }}
-.custom-header input[type="text"] {{
-    padding: 8px 15px;
-    border-radius: 20px;
-    border: 1px solid #aaa;
-    font-size: 1rem;
-    width: 200px;
+
+/* Animated Title */
+@keyframes glowBounce {{
+  0%, 100% {{
+    color: #005c97;
+    text-shadow:
+      0 0 5px #7997e8,
+      0 0 10px #7997e8,
+      0 0 20px #7997e8,
+      0 0 40px #f6d3ff,
+      0 0 80px #f6d3ff;
+    transform: translateY(0) scale(1);
+  }}
+  50% {{
+    color: #f6d3ff;
+    text-shadow:
+      0 0 10px #f6d3ff,
+      0 0 20px #f6d3ff,
+      0 0 30px #f6d3ff,
+      0 0 60px #7997e8,
+      0 0 90px #7997e8;
+    transform: translateY(-20px) scale(1.15);
+  }}
+}}
+.animated-title {{
+  font-family: 'Roboto', sans-serif;
+  font-weight: 900;
+  font-size: 5rem;
+  text-align: center;
+  animation: glowBounce 2.5s ease-in-out infinite;
+  user-select: none;
+  margin-bottom: 0.5rem;
+  cursor: default;
 }}
 </style>
-<div class="custom-header">
-    <img src="https://www.fmpm.uca.ma/sites/default/files/inline-images/logo_uca_fmpm.png" alt="Faculty Logo">
-    <h1>About</h1>
-    <input type="text" placeholder="🔍 Search...">
+<div class="header-container">
+    <img src="{logo_url}" alt="Faculty Logo">
+    <div class="header-title">About</div>
+    <div><input type="text" placeholder="🔍 Search" style="padding:5px 10px;border-radius:5px;"></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -185,7 +229,6 @@ st.markdown("""
     padding-top: 15px;
 }
 </style>
-
 <div class="booking-style-footer">
     <div class="footer-columns">
         <div class="footer-column">
