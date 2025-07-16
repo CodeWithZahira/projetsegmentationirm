@@ -14,9 +14,8 @@ st.set_page_config(page_title="NeuroSeg Advanced", layout="wide")
 # =============================
 # 🎨 STYLING & ASSETS
 # =============================
-# I've replaced the local file logic with a direct URL.
-# Replace this URL with the one you copied from Google or another image source.
-image_url = "https://png.pngtree.com/background/20230617/original/pngtree-artificial-brain-in-isolation-a-3d-rendered-image-picture-image_3703617.jpg" 
+# Replace this URL with one for your desired background image
+image_url = "https://images.pexels.com/photos/691668/pexels-photo-691668.jpeg" 
 
 page_bg_img = f"""
 <style>
@@ -37,10 +36,14 @@ page_bg_img = f"""
     background: linear-gradient(45deg, rgba(15, 32, 39, 0.85), rgba(32, 58, 67, 0.85), rgba(44, 83, 100, 0.85));
     z-index: -1;
 }}
+/* Style the sidebar */
+[data-testid="stSidebar"] > div:first-child {{
+    background: linear-gradient(20deg, rgb(15 32 39 / 85%), rgb(32 58 67 / 85%));
+    color: white;
+}}
 </style>
 """
 st.markdown(page_bg_img, unsafe_allow_html=True)
-
 
 st.markdown("""
 <style>
@@ -76,6 +79,29 @@ h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stFileUploader {
 }
 </style>
 """, unsafe_allow_html=True)
+
+
+# =============================
+# 👤 SIDEBAR - ABOUT & CREDITS
+# =============================
+# --- Replace this with the URL of your university's logo ---
+logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/MIT_logo.svg/1200px-MIT_logo.svg.png" # Example: MIT Logo
+
+st.sidebar.image(logo_url, width=150)
+st.sidebar.title("About this Project")
+st.sidebar.markdown("---")
+
+st.sidebar.header("Author")
+st.sidebar.write("👤 **Name:** [Your Name Here]")
+st.sidebar.write("📧 **Email:** [your.email@university.edu]")
+st.sidebar.markdown("---")
+
+st.sidebar.header("Supervisors")
+st.sidebar.write("👨‍🏫 **Supervisor 1:** [Professor's Name]")
+st.sidebar.write("👨‍🏫 **Supervisor 2:** [Professor's Name]")
+st.sidebar.markdown("---")
+st.sidebar.info("This application was developed as part of a research project at [Your University Name].")
+
 
 # =============================
 # 💬 Bienvenue + Animation
