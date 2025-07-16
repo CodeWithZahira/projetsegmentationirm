@@ -5,7 +5,6 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import io
 import streamlit.components.v1 as com
-import base64
 
 # =============================
 # 🔧 PAGE CONFIG
@@ -15,43 +14,32 @@ st.set_page_config(page_title="NeuroSeg Advanced", layout="wide")
 # =============================
 # 🎨 STYLING & ASSETS
 # =============================
-def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+# I've replaced the local file logic with a direct URL.
+# Replace this URL with the one you copied from Google or another image source.
+image_url = "https://static.vecteezy.com/system/resources/previews/014/551/268/original/abstract-geometric-white-and-gray-color-background-illustration-background-can-be-used-in-cover-design-book-design-poster-cd-cover-flyer-website-backgrounds-or-advertising-vector.jpg" 
 
-# Replace 'background.jpg' with the actual path to your background image
-# You can download a suitable image from sites like Unsplash or Pexels.
-# For this example, I'll assume you have an image named 'background.jpg' in the same directory.
-# As a placeholder, let's create a dummy file. In a real scenario, you'd have your own image.
-with open("background.jpg", "w") as f:
-    f.write("dummy background image")
-
-try:
-    page_bg_img = f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/jpeg;base64,{get_base64_of_bin_file('https://static.vecteezy.com/system/resources/previews/014/551/268/original/abstract-geometric-white-and-gray-color-background-illustration-background-can-be-used-in-cover-design-book-design-poster-cd-cover-flyer-website-backgrounds-or-advertising-vector.jpg')}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-    .stApp::before {{
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(15, 32, 39, 0.85), rgba(32, 58, 67, 0.85), rgba(44, 83, 100, 0.85));
-        z-index: -1;
-    }}
-    </style>
-    """
-    st.markdown(page_bg_img, unsafe_allow_html=True)
-except FileNotFoundError:
-    st.warning("Background image not found. Please add a 'background.jpg' to your directory.")
+page_bg_img = f"""
+<style>
+.stApp {{
+    background-image: url("{image_url}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}}
+.stApp::before {{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(15, 32, 39, 0.85), rgba(32, 58, 67, 0.85), rgba(44, 83, 100, 0.85));
+    z-index: -1;
+}}
+</style>
+"""
+st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
 st.markdown("""
