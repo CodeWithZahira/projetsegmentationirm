@@ -36,11 +36,21 @@ def tflite_predict(interpreter, input_data):
 
 def superimpose_mask_on_image(original_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4):
     """Superimpose a colored mask on a grayscale image."""
+    # Resize mask to match original image
     mask_pil = Image.fromarray(mask_np).resize(original_pil.size)
+    
+    # Convert original grayscale image to RGB
     original_rgb = original_pil.convert("RGB")
+    
+    # Create a colored mask image (red by default)
     color_mask = Image.new("RGB", original_pil.size, mask_color)
+    
+    # Create mask transparency mask with alpha
     mask_rgba = mask_pil.convert("L").point(lambda p: int(p * alpha))
+    
+    # Composite the color mask on original image using mask transparency
     composite = Image.composite(color_mask, original_rgb, mask_rgba)
+    
     return composite
 
 def display_prediction(image_pil, mask):
@@ -74,13 +84,19 @@ def extract_frames_from_video(video_file, max_frames=30):
     return frames
 
 def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
-    mask_pil = Image.fromarray(mask).convert("L").resize(original.size)
+    # Convert mask array to PIL Image (grayscale)
+    mask_pil = Image.fromarray(mask).convert("L")
+    # Resize mask to original image size (if needed)
+    mask_pil = mask_pil.resize(original.size)
+    # Create a new image wide enough to hold both side by side
     combined_width = original.width + mask_pil.width
     combined_height = max(original.height, mask_pil.height)
     combined_img = Image.new("RGB", (combined_width, combined_height))
+    # Convert original grayscale to RGB
     original_rgb = original.convert("RGB")
     combined_img.paste(original_rgb, (0, 0))
     combined_img.paste(mask_pil.convert("RGB"), (original.width, 0))
+    # Add labels
     draw = ImageDraw.Draw(combined_img)
     font = ImageFont.load_default()
     draw.text((10, 10), "MRI Scan", fill="red", font=font)
@@ -89,17 +105,41 @@ def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
 
 def get_combined_download_links(original, mask, idx):
     combined_img = combine_images(original, mask)
-    buffered_png = BytesIO()
-    combined_img.save(buffered_png, format="PNG")
-    st.download_button(label="📥 Download MRI + Mask as PNG", data=buffered_png.getvalue(), file_name=f"combined_{idx+1}.png", mime="image/png")
-    
+
+    # PNG download
+    buffered = BytesIO()
+    combined_img.save(buffered, format="PNG")
+    png_data = buffered.getvalue()
+    st.download_button(
+        label="📥 Download MRI + Mask as PNG",
+        data=png_data,
+        file_name=f"combined_{idx+1}.png",
+        mime="image/png"
+    )
+
+    # PDF download
     pdf = FPDF()
     pdf.add_page()
+    pdf_w, pdf_h = pdf.w - 2*pdf.l_margin, pdf.h - 2*pdf.t_margin
+
+    buffered_pdf_img = BytesIO()
+    combined_img.save(buffered_pdf_img, format="JPEG")
+    buffered_pdf_img.seek(0)
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img_file:
-        combined_img.save(tmp_img_file, format="JPEG")
-        pdf.image(tmp_img_file.name, x=pdf.l_margin, y=pdf.t_margin, w=pdf.w - 2*pdf.l_margin)
+        tmp_img_file.write(buffered_pdf_img.read())
+        tmp_img_file_path = tmp_img_file.name
+
+    pdf.image(tmp_img_file_path, x=pdf.l_margin, y=pdf.t_margin, w=pdf_w)
     pdf_output = pdf.output(dest="S").encode("latin1")
-    st.download_button(label="📥 Download MRI + Mask as PDF", data=pdf_output, file_name=f"combined_{idx+1}.pdf", mime="application/pdf")
+    os.remove(tmp_img_file_path)
+
+    st.download_button(
+        label="📥 Download MRI + Mask as PDF",
+        data=pdf_output,
+        file_name=f"combined_{idx+1}.pdf",
+        mime="application/pdf"
+    )
 
 # =============================
 # 🔧 PAGE CONFIG
@@ -109,7 +149,6 @@ st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 # =============================
 # 🎨 STYLING & BACKGROUND + TITLE ANIMATION
 # =============================
-# (All the styling CSS remains the same as before)
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
 <style>
@@ -118,6 +157,7 @@ st.markdown(f"""
   initial-value: 0deg;
   inherits: false;
 }}
+
 .stApp {{
     background-image: url("{image_url}");
     background-size: cover;
@@ -132,9 +172,12 @@ st.markdown(f"""
     background: linear-gradient(45deg, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
     z-index: -1;
 }}
+
 h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
     color: black !important;
 }}
+
+/* Animated Button */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -173,18 +216,31 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
+
+/* 🔥 BIG Attention-Grabbing Title Animation */
 @keyframes glowBounce {{
   0%, 100% {{
     color: #005c97;
-    text-shadow: 0 0 5px #7997e8, 0 0 10px #7997e8, 0 0 20px #7997e8, 0 0 40px #f6d3ff, 0 0 80px #f6d3ff;
+    text-shadow:
+      0 0 5px #7997e8,
+      0 0 10px #7997e8,
+      0 0 20px #7997e8,
+      0 0 40px #f6d3ff,
+      0 0 80px #f6d3ff;
     transform: translateY(0) scale(1);
   }}
   50% {{
     color: #f6d3ff;
-    text-shadow: 0 0 10px #f6d3ff, 0 0 20px #f6d3ff, 0 0 30px #f6d3ff, 0 0 60px #7997e8, 0 0 90px #7997e8;
+    text-shadow:
+      0 0 10px #f6d3ff,
+      0 0 20px #f6d3ff,
+      0 0 30px #f6d3ff,
+      0 0 60px #7997e8,
+      0 0 90px #7997e8;
     transform: translateY(-20px) scale(1.15);
   }}
 }}
+
 .animated-title {{
   font-family: 'Roboto', sans-serif;
   font-weight: 900;
@@ -204,11 +260,17 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
 with st.container():
     col1, col2 = st.columns([1, 2], gap="large")
     with col1:
-        com.iframe("https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie", height=400)
+        com.iframe(
+            "https://lottie.host/embed/a0bb04f2-9027-4848-907f-e4891de977af/lnTdVRZOiZ.lottie",
+            height=400
+        )
     with col2:
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown('<h1 class="animated-title">NeuroSeg</h1>', unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan(s) or video to experience the power of AI-driven segmentation.</p>", unsafe_allow_html=True)
+        st.markdown(
+            "<p style='text-align: center; font-size:1.5rem;'>Witness the future of medical imaging. Upload your model and MRI scan(s) or video to experience the power of AI-driven segmentation.</p>",
+            unsafe_allow_html=True
+        )
 
 # =============================
 # 🚀 MAIN APPLICATION
@@ -221,9 +283,11 @@ with col1:
     st.header("1. Get & Upload Model")
     st.markdown("First, download the pre-trained model file.")
     model_download_url = "https://drive.google.com/uc?export=download&id=1HPkPPcdUD-bcOUnwhlNf_UpQG5OBy8qr"
+
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     st.link_button("⬇️ Download the Model (.tflite)", model_download_url, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
     model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
@@ -242,24 +306,8 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    
-    #<-- START OF MODIFIED SECTION -->
-    # Initialize session state for file uploaders if they don't exist
-    if 'image_uploader' not in st.session_state:
-        st.session_state.image_uploader = []
-    if 'video_uploader' not in st.session_state:
-        st.session_state.video_uploader = None
-
-    # Use the 'key' argument for the file uploaders
-    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed", key="image_uploader")
-    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed", key="video_uploader")
-
-    # When the button is clicked, clear the state and force a rerun
-    if st.button("🧹 Clear All Images & Videos", use_container_width=True):
-        st.session_state.image_uploader = []
-        st.session_state.video_uploader = None
-        st.rerun()
-    #<-- END OF MODIFIED SECTION -->
+    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
+    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
 
     all_images = []
     if image_files:
@@ -281,10 +329,16 @@ if model_loaded and all_images:
         for idx, item in enumerate(all_images):
             with st.spinner(f"Analyzing input {idx + 1}..."):
                 try:
-                    img_array, img_pil = preprocess_image(item)
+                    if isinstance(item, Image.Image):
+                        img_array, img_pil = preprocess_image(item)
+                    else:
+                        img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
                     display_prediction(img_pil, pred_mask)
+
+                    # Combined download links
                     get_combined_download_links(img_pil, pred_mask, idx)
+
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
@@ -292,12 +346,72 @@ if model_loaded and all_images:
 # =============================
 # 🎓 FOOTER
 # =============================
-# (The footer markdown remains the same)
 st.markdown("""
 <style>
-.booking-style-footer { /* ... styles ... */ }
+.booking-style-footer {
+    background-color: #f9f9f9;
+    padding: 50px 30px 20px 30px;
+    font-family: sans-serif;
+    border-top: 1px solid #ddd;
+    color: black;
+}
+.booking-style-footer h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.booking-style-footer p, .booking-style-footer a {
+    font-size: 15px;
+    color: black;
+    text-decoration: none;
+    margin: 4px 0;
+}
+.footer-columns {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 50px;
+}
+.footer-column {
+    flex: 1;
+    min-width: 200px;
+}
+.footer-bottom {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
 </style>
+
 <div class="booking-style-footer">
-    <!-- ... footer content ... -->
+    <div class="footer-columns">
+        <div class="footer-column">
+            <h4>Developed By</h4>
+            <p>Zahira ELLAOUAH</p>
+            <p><a href="mailto:zahiraellaouah@gmail.com">zahiraellaouah@gmail.com</a></p>
+        </div>
+        <div class="footer-column">
+            <h4>Supervised By</h4>
+            <p>Pr. Nezha Oumghar</p>
+            <p>Pr. Mohamed Amine Chadi</p>
+        </div>
+        <div class="footer-column">
+            <h4>University</h4>
+            <p>Cadi Ayyad University</p>
+            <p>Faculty of Medicine and Pharmacy</p>
+            <p>Marrakesh</p>
+        </div>
+        <div class="footer-column">
+            <h4>Project</h4>
+            <p>Automatic Segmentation of Brain MRIs by Convolutional Neural Network U-Net</p>
+            <p>Master's in biomedical instrumentation and analysis</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 Zahira Ellaouah – All rights reserved</p>
+    </div>
 </div>
 """, unsafe_allow_html=True)
