@@ -37,33 +37,29 @@ def tflite_predict(interpreter, input_data):
     return prediction
 
 def superimpose_mask_on_image(original_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4):
-    """Superimpose a colored mask on a grayscale image."""
-    # Resize mask to match original image
-    mask_pil = Image.fromarray(mask_np).resize(original_pil.size)
-    
-    # Convert original grayscale image to RGB
-    original_rgb = original_pil.convert("RGB")
-    
-    # Create a colored mask image (red by default)
-    color_mask = Image.new("RGB", original_pil.size, mask_color)
-    
-    # Create mask transparency mask with alpha
-    mask_rgba = mask_pil.convert("L").point(lambda p: int(p * alpha))
-    
-    # Composite the color mask on original image using mask transparency
-    composite = Image.composite(color_mask, original_rgb, mask_rgba)
-    
-    return composite
+    # Convert grayscale mask to RGBA
+    mask_rgb = np.zeros((mask_np.shape[0], mask_np.shape[1], 4), dtype=np.uint8)
+    mask_rgb[..., 0] = mask_color[0]  # R
+    mask_rgb[..., 1] = mask_color[1]  # G
+    mask_rgb[..., 2] = mask_color[2]  # B
+    mask_rgb[..., 3] = (mask_np / 255 * 255 * alpha).astype(np.uint8)  # Alpha based on mask
+
+    mask_pil = Image.fromarray(mask_rgb, mode="RGBA").resize(original_pil.size)
+    original_rgb = original_pil.convert("RGBA")
+    combined = Image.alpha_composite(original_rgb, mask_pil)
+    return combined.convert("RGB")
 
 def display_prediction(image_pil, mask):
     st.markdown("---")
     st.subheader("Segmentation Result")
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
         st.image(image_pil, caption="Original MRI Scan", use_container_width=True)
     with col2:
-        superimposed = superimpose_mask_on_image(image_pil, mask, mask_color=(255, 0, 0), alpha=0.4)
-        st.image(superimposed, caption="Superimposed Segmentation Mask", use_container_width=True)
+        st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
+    with col3:
+        superimposed = superimpose_mask_on_image(image_pil, mask)
+        st.image(superimposed, caption="Overlay: MRI + Mask", use_container_width=True)
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
@@ -86,24 +82,13 @@ def extract_frames_from_video(video_file, max_frames=30):
     return frames
 
 def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
-    # Convert mask array to PIL Image (grayscale)
-    mask_pil = Image.fromarray(mask).convert("L")
-    # Resize mask to original image size (if needed)
-    mask_pil = mask_pil.resize(original.size)
-    # Create a new image wide enough to hold both side by side
-    combined_width = original.width + mask_pil.width
-    combined_height = max(original.height, mask_pil.height)
-    combined_img = Image.new("RGB", (combined_width, combined_height))
-    # Convert original grayscale to RGB
-    original_rgb = original.convert("RGB")
-    combined_img.paste(original_rgb, (0, 0))
-    combined_img.paste(mask_pil.convert("RGB"), (original.width, 0))
+    # Create overlay with color and alpha
+    overlay = superimpose_mask_on_image(original, mask)
     # Add labels
-    draw = ImageDraw.Draw(combined_img)
+    draw = ImageDraw.Draw(overlay)
     font = ImageFont.load_default()
-    draw.text((10, 10), "MRI Scan", fill="red", font=font)
-    draw.text((original.width + 10, 10), "Segmentation Mask", fill="red", font=font)
-    return combined_img
+    draw.text((10, 10), "MRI + Mask Overlay", fill="red", font=font)
+    return overlay
 
 def get_combined_download_links(original, mask, idx):
     combined_img = combine_images(original, mask)
@@ -143,17 +128,17 @@ def get_combined_download_links(original, mask, idx):
         mime="application/pdf"
     )
 
-# =============================
-# 🔧 SESSION STATE INITIALIZATION
-# =============================
-if 'model_file' not in st.session_state:
-    st.session_state['model_file'] = None
-if 'image_files' not in st.session_state:
-    st.session_state['image_files'] = []
-if 'video_file' not in st.session_state:
-    st.session_state['video_file'] = None
-if 'segmentation_results' not in st.session_state:
-    st.session_state['segmentation_results'] = []  # Will hold tuples (image, mask)
+def generate_zip(images_masks):
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zf:
+        for i, (img_pil, mask_np) in enumerate(images_masks):
+            combined_img = combine_images(img_pil, mask_np)
+            img_byte_arr = io.BytesIO()
+            combined_img.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
+            zf.writestr(f"segmentation_{i+1}.png", img_byte_arr)
+    zip_buffer.seek(0)
+    return zip_buffer
 
 # =============================
 # 🔧 PAGE CONFIG
@@ -161,8 +146,7 @@ if 'segmentation_results' not in st.session_state:
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 🎨 STYLING & BACKGROUND + TITLE ANIMATION
-# (No changes here, same as before)
+# 🎨 BACKGROUND & TITLE ANIMATION
 # =============================
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
@@ -188,11 +172,10 @@ st.markdown(f"""
     z-index: -1;
 }}
 
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button {{
     color: black !important;
 }}
 
-/* Animated Button */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -232,7 +215,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
-/* 🔥 BIG Attention-Grabbing Title Animation */
 @keyframes glowBounce {{
   0%, 100% {{
     color: #005c97;
@@ -305,14 +287,13 @@ with col1:
 
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
-    model_file = st.file_uploader(
+    st.file_uploader(
         "Upload model", type=["tflite"], label_visibility="collapsed", key="model_file"
     )
 
-    # Load model if uploaded
     interpreter = None
     model_loaded = False
-    if st.session_state['model_file']:
+    if st.session_state.get('model_file') is not None:
         try:
             tflite_model = st.session_state['model_file'].read()
             interpreter = tf.lite.Interpreter(model_content=tflite_model)
@@ -324,14 +305,14 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    image_files = st.file_uploader(
+    st.file_uploader(
         "Upload MRI Images",
         type=["png", "jpg", "jpeg", "tif", "tiff"],
         accept_multiple_files=True,
         label_visibility="collapsed",
         key="image_files"
     )
-    video_file = st.file_uploader(
+    st.file_uploader(
         "Or upload an MRI Video (mp4 or avi)",
         type=["mp4", "avi"],
         label_visibility="collapsed",
@@ -353,11 +334,11 @@ st.button("🧹 Clear All Inputs & Results", on_click=clear_all)
 # Gather all images from uploads and video frames
 # =============================
 all_images = []
-if st.session_state['image_files']:
+if st.session_state.get('image_files'):
     for file in st.session_state['image_files']:
         all_images.append(file)
 
-if st.session_state['video_file']:
+if st.session_state.get('video_file'):
     with st.spinner("Extracting frames from video..."):
         frames = extract_frames_from_video(st.session_state['video_file'])
         all_images.extend(frames)
@@ -380,7 +361,7 @@ if model_loaded and all_images:
                     display_prediction(img_pil, pred_mask)
 
                     # Store results for bulk download
-                    st.session_state['segmentation_results'].append((img_pil, pred_mask))
+                    st.session_state.setdefault('segmentation_results', []).append((img_pil, pred_mask))
 
                     # Individual download buttons
                     get_combined_download_links(img_pil, pred_mask, idx)
@@ -391,19 +372,7 @@ if model_loaded and all_images:
 # =============================
 # Download all segmentations as ZIP
 # =============================
-def generate_zip(images_masks):
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zf:
-        for i, (img_pil, mask_np) in enumerate(images_masks):
-            combined_img = superimpose_mask_on_image(img_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4)
-            img_byte_arr = io.BytesIO()
-            combined_img.save(img_byte_arr, format='PNG')
-            img_byte_arr = img_byte_arr.getvalue()
-            zf.writestr(f"segmentation_{i+1}.png", img_byte_arr)
-    zip_buffer.seek(0)
-    return zip_buffer
-
-if st.session_state['segmentation_results']:
+if st.session_state.get('segmentation_results'):
     st.markdown("---")
     st.header("📦 Download All Segmentations")
 
