@@ -343,6 +343,43 @@ if model_loaded and all_images:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
 
+
+
+
+
+
+import zipfile
+
+# Create and cache the ZIP file to avoid regeneration on every rerun
+@st.cache_data
+def generate_zip_of_segmented_images(interpreter, all_images):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_path = os.path.join(tmpdir, "segmented_outputs.zip")
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for idx, item in enumerate(all_images):
+                img_array, img_pil = preprocess_image(item)
+                pred_mask = tflite_predict(interpreter, img_array)
+                combined = combine_images(img_pil, pred_mask)
+                
+                # Save each combined image as a PNG
+                img_filename = f"segmented_{idx+1}.png"
+                img_path = os.path.join(tmpdir, img_filename)
+                combined.save(img_path)
+                zipf.write(img_path, arcname=img_filename)
+
+        with open(zip_path, 'rb') as f:
+            return f.read()
+
+if model_loaded and all_images:
+    zip_bytes = generate_zip_of_segmented_images(interpreter, all_images)
+    st.download_button(
+        label="🗜️ Download All Segmentations (ZIP)",
+        data=zip_bytes,
+        file_name="all_segmentations.zip",
+        mime="application/zip"
+    )
+
+
 # =============================
 # 🎓 FOOTER
 # =============================
