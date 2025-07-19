@@ -34,20 +34,15 @@ def tflite_predict(interpreter, input_data):
     prediction = (prediction > 0.5).astype(np.uint8) * 255
     return prediction
 
-def overlay_mask(original: Image.Image, mask: np.ndarray, mask_color=(255, 0, 0), alpha=0.4) -> Image.Image:
-    """
-    Overlay a colored mask on the grayscale original image.
-    """
-    original_rgb = original.convert("RGB")
-    mask_img = Image.fromarray(mask).convert("L").resize(original.size)
-
-    # Create a color mask image
-    color_mask = Image.new("RGB", original.size, mask_color)
-    # Apply mask to color image using mask as alpha channel
-    colored_mask = Image.composite(color_mask, Image.new("RGB", original.size), mask_img)
-
-    # Blend original and mask images
-    blended = Image.blend(original_rgb, colored_mask, alpha=alpha)
+def overlay_mask(image_pil, mask_np, color=(255, 0, 0), alpha=0.5):
+    """Overlay a colored mask onto the original grayscale image."""
+    mask_rgb = Image.fromarray(mask_np).convert("L").resize(image_pil.size)
+    mask_rgb = np.array(mask_rgb)
+    colored_mask = np.zeros((mask_rgb.shape[0], mask_rgb.shape[1], 3), dtype=np.uint8)
+    colored_mask[mask_rgb > 0] = color
+    image_rgb = image_pil.convert("RGB")
+    overlay = Image.fromarray(colored_mask)
+    blended = Image.blend(image_rgb, overlay, alpha=alpha)
     return blended
 
 def display_prediction(image_pil, mask):
@@ -59,8 +54,8 @@ def display_prediction(image_pil, mask):
     with col2:
         st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
     with col3:
-        overlaid_img = overlay_mask(image_pil, mask)
-        st.image(overlaid_img, caption="Overlay: MRI + Mask", use_container_width=True)
+        overlayed = overlay_mask(image_pil, mask)
+        st.image(overlayed, caption="Overlayed Segmentation", use_container_width=True)
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
@@ -83,14 +78,19 @@ def extract_frames_from_video(video_file, max_frames=30):
     return frames
 
 def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
+    # Convert mask array to PIL Image (grayscale)
     mask_pil = Image.fromarray(mask).convert("L")
+    # Resize mask to original image size (if needed)
     mask_pil = mask_pil.resize(original.size)
+    # Create a new image wide enough to hold both side by side
     combined_width = original.width + mask_pil.width
     combined_height = max(original.height, mask_pil.height)
     combined_img = Image.new("RGB", (combined_width, combined_height))
+    # Convert original grayscale to RGB
     original_rgb = original.convert("RGB")
     combined_img.paste(original_rgb, (0, 0))
     combined_img.paste(mask_pil.convert("RGB"), (original.width, 0))
+    # Add labels
     draw = ImageDraw.Draw(combined_img)
     font = ImageFont.load_default()
     draw.text((10, 10), "MRI Scan", fill="red", font=font)
@@ -99,6 +99,8 @@ def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
 
 def get_combined_download_links(original, mask, idx):
     combined_img = combine_images(original, mask)
+
+    # PNG download
     buffered = BytesIO()
     combined_img.save(buffered, format="PNG")
     png_data = buffered.getvalue()
@@ -108,18 +110,24 @@ def get_combined_download_links(original, mask, idx):
         file_name=f"combined_{idx+1}.png",
         mime="image/png"
     )
+
+    # PDF download
     pdf = FPDF()
     pdf.add_page()
     pdf_w, pdf_h = pdf.w - 2*pdf.l_margin, pdf.h - 2*pdf.t_margin
+
     buffered_pdf_img = BytesIO()
     combined_img.save(buffered_pdf_img, format="JPEG")
     buffered_pdf_img.seek(0)
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img_file:
         tmp_img_file.write(buffered_pdf_img.read())
         tmp_img_file_path = tmp_img_file.name
+
     pdf.image(tmp_img_file_path, x=pdf.l_margin, y=pdf.t_margin, w=pdf_w)
     pdf_output = pdf.output(dest="S").encode("latin1")
     os.remove(tmp_img_file_path)
+
     st.download_button(
         label="📥 Download MRI + Mask as PDF",
         data=pdf_output,
@@ -261,7 +269,6 @@ with st.container():
 # =============================
 # 🚀 MAIN APPLICATION
 # =============================
-st.markdown("<br><hr><br>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2, gap="large")
 
@@ -277,7 +284,7 @@ with col1:
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
 
-    # Use keys to keep states properly
+    # Model file uploader with key
     model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed", key="model_file")
 
     interpreter = None
@@ -295,21 +302,44 @@ with col1:
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
 
-    # Image uploader with session state key
-    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"],
-                                   accept_multiple_files=True, label_visibility="collapsed", key="image_files")
-    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"],
-                                  label_visibility="collapsed", key="video_file")
+    # Initialize session states for stored files
+    if "stored_images" not in st.session_state:
+        st.session_state["stored_images"] = []
+    if "stored_video" not in st.session_state:
+        st.session_state["stored_video"] = None
 
+    # Only update stored_images if uploader has new files and stored_images is empty
+    image_files = st.file_uploader(
+        "Upload MRI Images",
+        type=["png", "jpg", "jpeg", "tif", "tiff"],
+        accept_multiple_files=True,
+        label_visibility="collapsed",
+        key="image_uploader"
+    )
+
+    if image_files and len(st.session_state["stored_images"]) == 0:
+        st.session_state["stored_images"] = image_files
+
+    # Video uploader
+    video_file = st.file_uploader(
+        "Or upload an MRI Video (mp4 or avi)",
+        type=["mp4", "avi"],
+        label_visibility="collapsed",
+        key="video_uploader"
+    )
+
+    if video_file and st.session_state["stored_video"] is None:
+        st.session_state["stored_video"] = video_file
+
+    # Gather all images to process
     all_images = []
-    if image_files:
-        for file in image_files:
-            st.image(file, caption=file.name, use_container_width=True)
-            all_images.append(file)
+    for img in st.session_state["stored_images"]:
+        st.image(img, caption=img.name if hasattr(img, "name") else "Uploaded Image", use_container_width=True)
+        all_images.append(img)
 
-    if video_file:
+    if st.session_state["stored_video"] is not None:
         with st.spinner("Extracting frames from video..."):
-            frames = extract_frames_from_video(video_file)
+            frames = extract_frames_from_video(st.session_state["stored_video"])
             for i, frame in enumerate(frames):
                 st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
                 all_images.append(frame)
@@ -317,10 +347,11 @@ with col2:
 # =============================
 # Clear Inputs button logic
 # =============================
+
 def clear_inputs():
-    st.session_state["image_files"] = []
-    st.session_state["video_file"] = None
-    st.session_state["cleared"] = True  # flag to trigger rerun
+    st.session_state["stored_images"] = []
+    st.session_state["stored_video"] = None
+    st.session_state["cleared"] = True
 
 st.markdown("<br>")
 st.button("🧹 Clear Inputs (Images & Video only)", on_click=clear_inputs)
@@ -332,6 +363,7 @@ if st.session_state.get("cleared", False):
 # =============================
 # Perform segmentation if model loaded and images available
 # =============================
+
 if model_loaded and all_images:
     st.markdown("<br>")
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
