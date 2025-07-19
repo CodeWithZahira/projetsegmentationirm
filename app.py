@@ -8,8 +8,6 @@ import tempfile
 import os
 from io import BytesIO
 from fpdf import FPDF
-import io
-import zipfile
 
 # =============================
 # 📦 UTILITY FUNCTIONS
@@ -36,30 +34,33 @@ def tflite_predict(interpreter, input_data):
     prediction = (prediction > 0.5).astype(np.uint8) * 255
     return prediction
 
-def superimpose_mask_on_image(original_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4):
-    # Convert grayscale mask to RGBA
-    mask_rgb = np.zeros((mask_np.shape[0], mask_np.shape[1], 4), dtype=np.uint8)
-    mask_rgb[..., 0] = mask_color[0]  # R
-    mask_rgb[..., 1] = mask_color[1]  # G
-    mask_rgb[..., 2] = mask_color[2]  # B
-    mask_rgb[..., 3] = (mask_np / 255 * 255 * alpha).astype(np.uint8)  # Alpha based on mask
+def overlay_mask(original: Image.Image, mask: np.ndarray, mask_color=(255, 0, 0), alpha=0.4) -> Image.Image:
+    """
+    Overlay a colored mask on the grayscale original image.
+    """
+    original_rgb = original.convert("RGB")
+    mask_img = Image.fromarray(mask).convert("L").resize(original.size)
 
-    mask_pil = Image.fromarray(mask_rgb, mode="RGBA").resize(original_pil.size)
-    original_rgb = original_pil.convert("RGBA")
-    combined = Image.alpha_composite(original_rgb, mask_pil)
-    return combined.convert("RGB")
+    # Create a color mask image
+    color_mask = Image.new("RGB", original.size, mask_color)
+    # Apply mask to color image using mask as alpha channel
+    colored_mask = Image.composite(color_mask, Image.new("RGB", original.size), mask_img)
+
+    # Blend original and mask images
+    blended = Image.blend(original_rgb, colored_mask, alpha=alpha)
+    return blended
 
 def display_prediction(image_pil, mask):
     st.markdown("---")
     st.subheader("Segmentation Result")
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.image(image_pil, caption="Original MRI Scan", use_container_width=True)
     with col2:
         st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
     with col3:
-        superimposed = superimpose_mask_on_image(image_pil, mask)
-        st.image(superimposed, caption="Overlay: MRI + Mask", use_container_width=True)
+        overlaid_img = overlay_mask(image_pil, mask)
+        st.image(overlaid_img, caption="Overlay: MRI + Mask", use_container_width=True)
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
@@ -82,18 +83,22 @@ def extract_frames_from_video(video_file, max_frames=30):
     return frames
 
 def combine_images(original: Image.Image, mask: np.ndarray) -> Image.Image:
-    # Create overlay with color and alpha
-    overlay = superimpose_mask_on_image(original, mask)
-    # Add labels
-    draw = ImageDraw.Draw(overlay)
+    mask_pil = Image.fromarray(mask).convert("L")
+    mask_pil = mask_pil.resize(original.size)
+    combined_width = original.width + mask_pil.width
+    combined_height = max(original.height, mask_pil.height)
+    combined_img = Image.new("RGB", (combined_width, combined_height))
+    original_rgb = original.convert("RGB")
+    combined_img.paste(original_rgb, (0, 0))
+    combined_img.paste(mask_pil.convert("RGB"), (original.width, 0))
+    draw = ImageDraw.Draw(combined_img)
     font = ImageFont.load_default()
-    draw.text((10, 10), "MRI + Mask Overlay", fill="red", font=font)
-    return overlay
+    draw.text((10, 10), "MRI Scan", fill="red", font=font)
+    draw.text((original.width + 10, 10), "Segmentation Mask", fill="red", font=font)
+    return combined_img
 
 def get_combined_download_links(original, mask, idx):
     combined_img = combine_images(original, mask)
-
-    # PNG download
     buffered = BytesIO()
     combined_img.save(buffered, format="PNG")
     png_data = buffered.getvalue()
@@ -103,24 +108,18 @@ def get_combined_download_links(original, mask, idx):
         file_name=f"combined_{idx+1}.png",
         mime="image/png"
     )
-
-    # PDF download
     pdf = FPDF()
     pdf.add_page()
     pdf_w, pdf_h = pdf.w - 2*pdf.l_margin, pdf.h - 2*pdf.t_margin
-
     buffered_pdf_img = BytesIO()
     combined_img.save(buffered_pdf_img, format="JPEG")
     buffered_pdf_img.seek(0)
-
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_img_file:
         tmp_img_file.write(buffered_pdf_img.read())
         tmp_img_file_path = tmp_img_file.name
-
     pdf.image(tmp_img_file_path, x=pdf.l_margin, y=pdf.t_margin, w=pdf_w)
     pdf_output = pdf.output(dest="S").encode("latin1")
     os.remove(tmp_img_file_path)
-
     st.download_button(
         label="📥 Download MRI + Mask as PDF",
         data=pdf_output,
@@ -128,25 +127,13 @@ def get_combined_download_links(original, mask, idx):
         mime="application/pdf"
     )
 
-def generate_zip(images_masks):
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zf:
-        for i, (img_pil, mask_np) in enumerate(images_masks):
-            combined_img = combine_images(img_pil, mask_np)
-            img_byte_arr = io.BytesIO()
-            combined_img.save(img_byte_arr, format='PNG')
-            img_byte_arr = img_byte_arr.getvalue()
-            zf.writestr(f"segmentation_{i+1}.png", img_byte_arr)
-    zip_buffer.seek(0)
-    return zip_buffer
-
 # =============================
 # 🔧 PAGE CONFIG
 # =============================
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
-# 🎨 BACKGROUND & TITLE ANIMATION
+# 🎨 STYLING & BACKGROUND + TITLE ANIMATION
 # =============================
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
@@ -172,10 +159,11 @@ st.markdown(f"""
     z-index: -1;
 }}
 
-h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button {{
+h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stButton button, .stLinkButton button, .st-emotion-cache-1c7y2kd, .st-emotion-cache-1v0mbdj {{
     color: black !important;
 }}
 
+/* Animated Button */
 .animated-button-container {{
     position: relative;
     display: inline-block;
@@ -215,6 +203,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, .stMarkdown, .stFileUploader label, .stBut
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }}
 
+/* 🔥 BIG Attention-Grabbing Title Animation */
 @keyframes glowBounce {{
   0%, 100% {{
     color: #005c97;
@@ -287,15 +276,18 @@ with col1:
 
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
-    st.file_uploader(
-        "Upload model", type=["tflite"], label_visibility="collapsed", key="model_file"
+    model_file = st.file_uploader(
+        "Upload model",
+        type=["tflite"],
+        key="model_file",
+        label_visibility="collapsed"
     )
 
     interpreter = None
     model_loaded = False
-    if st.session_state.get('model_file') is not None:
+    if model_file:
         try:
-            tflite_model = st.session_state['model_file'].read()
+            tflite_model = model_file.read()
             interpreter = tf.lite.Interpreter(model_content=tflite_model)
             interpreter.allocate_tensors()
             st.success("✅ Model loaded successfully.")
@@ -305,50 +297,46 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    st.file_uploader(
+    image_files = st.file_uploader(
         "Upload MRI Images",
         type=["png", "jpg", "jpeg", "tif", "tiff"],
         accept_multiple_files=True,
-        label_visibility="collapsed",
-        key="image_files"
+        key="image_files",
+        label_visibility="collapsed"
     )
-    st.file_uploader(
+    video_file = st.file_uploader(
         "Or upload an MRI Video (mp4 or avi)",
         type=["mp4", "avi"],
-        label_visibility="collapsed",
-        key="video_file"
+        key="video_file",
+        label_visibility="collapsed"
     )
 
-# =============================
-# Button to Clear Inputs and Results
-# =============================
-def clear_all():
-    st.session_state['model_file'] = None
-    st.session_state['image_files'] = []
-    st.session_state['video_file'] = None
-    st.session_state['segmentation_results'] = []
+    all_images = []
+    if image_files:
+        for file in image_files:
+            st.image(file, caption=file.name, use_container_width=True)
+            all_images.append(file)
 
-st.button("🧹 Clear All Inputs & Results", on_click=clear_all)
+    if video_file:
+        with st.spinner("Extracting frames from video..."):
+            frames = extract_frames_from_video(video_file)
+            for i, frame in enumerate(frames):
+                st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
+                all_images.append(frame)
 
-# =============================
-# Gather all images from uploads and video frames
-# =============================
-all_images = []
-if st.session_state.get('image_files'):
-    for file in st.session_state['image_files']:
-        all_images.append(file)
+# Clear inputs button — only clears images/video, not model
+def clear_inputs():
+    st.session_state["image_files"] = []
+    st.session_state["video_file"] = None
+    st.experimental_rerun()
 
-if st.session_state.get('video_file'):
-    with st.spinner("Extracting frames from video..."):
-        frames = extract_frames_from_video(st.session_state['video_file'])
-        all_images.extend(frames)
+st.markdown("<br>")
+st.button("🧹 Clear Inputs (Images & Video only)", on_click=clear_inputs)
 
-# =============================
-# Perform segmentation and show results
-# =============================
 if model_loaded and all_images:
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation for All Inputs", use_container_width=True):
-        st.session_state['segmentation_results'] = []  # Clear old results
         for idx, item in enumerate(all_images):
             with st.spinner(f"Analyzing input {idx + 1}..."):
                 try:
@@ -357,33 +345,14 @@ if model_loaded and all_images:
                     else:
                         img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
-                    st.write(f"### Result {idx+1}")
                     display_prediction(img_pil, pred_mask)
 
-                    # Store results for bulk download
-                    st.session_state.setdefault('segmentation_results', []).append((img_pil, pred_mask))
-
-                    # Individual download buttons
+                    # Combined download links
                     get_combined_download_links(img_pil, pred_mask, idx)
 
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
-
-# =============================
-# Download all segmentations as ZIP
-# =============================
-if st.session_state.get('segmentation_results'):
-    st.markdown("---")
-    st.header("📦 Download All Segmentations")
-
-    zip_data = generate_zip(st.session_state['segmentation_results'])
-
-    st.download_button(
-        label="📥 Download All Segmentation Images (ZIP)",
-        data=zip_data,
-        file_name="all_segmentations.zip",
-        mime="application/zip"
-    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # =============================
 # 🎓 FOOTER
