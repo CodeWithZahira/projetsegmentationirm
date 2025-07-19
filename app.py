@@ -342,34 +342,6 @@ if model_loaded and all_images:
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
-
-# =============================
-# Download all results as ZIP
-# =============================
-def generate_zip(images_masks):
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zf:
-        for i, (img_pil, mask_np) in enumerate(images_masks):
-            combined_img = superimpose_mask_on_image(img_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4)
-            img_byte_arr = io.BytesIO()
-            combined_img.save(img_byte_arr, format='PNG')
-            img_byte_arr = img_byte_arr.getvalue()
-            zf.writestr(f"segmentation_{i+1}.png", img_byte_arr)
-    zip_buffer.seek(0)
-    return zip_buffer
-
-if st.session_state['segmentation_results']:
-    st.markdown("---")
-    st.header("📦 Download All Segmentations")
-
-    zip_data = generate_zip(st.session_state['segmentation_results'])
-
-    st.download_button(
-        label="📥 Download All Segmentation Images (ZIP)",
-        data=zip_data,
-        file_name="all_segmentations.zip",
-        mime="application/zip"
-    )
 # =============================
 # 🎓 FOOTER
 # =============================
