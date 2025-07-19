@@ -276,12 +276,9 @@ with col1:
 
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
-    model_file = st.file_uploader(
-        "Upload model",
-        type=["tflite"],
-        key="model_file",
-        label_visibility="collapsed"
-    )
+
+    # Use keys to keep states properly
+    model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed", key="model_file")
 
     interpreter = None
     model_loaded = False
@@ -297,19 +294,12 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    image_files = st.file_uploader(
-        "Upload MRI Images",
-        type=["png", "jpg", "jpeg", "tif", "tiff"],
-        accept_multiple_files=True,
-        key="image_files",
-        label_visibility="collapsed"
-    )
-    video_file = st.file_uploader(
-        "Or upload an MRI Video (mp4 or avi)",
-        type=["mp4", "avi"],
-        key="video_file",
-        label_visibility="collapsed"
-    )
+
+    # Image uploader with session state key
+    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"],
+                                   accept_multiple_files=True, label_visibility="collapsed", key="image_files")
+    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"],
+                                  label_visibility="collapsed", key="video_file")
 
     all_images = []
     if image_files:
@@ -324,17 +314,26 @@ with col2:
                 st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
                 all_images.append(frame)
 
-# Clear inputs button — only clears images/video, not model
+# =============================
+# Clear Inputs button logic
+# =============================
 def clear_inputs():
     st.session_state["image_files"] = []
     st.session_state["video_file"] = None
-    st.experimental_rerun()
+    st.session_state["cleared"] = True  # flag to trigger rerun
 
 st.markdown("<br>")
 st.button("🧹 Clear Inputs (Images & Video only)", on_click=clear_inputs)
 
+if st.session_state.get("cleared", False):
+    st.session_state["cleared"] = False
+    st.experimental_rerun()
+
+# =============================
+# Perform segmentation if model loaded and images available
+# =============================
 if model_loaded and all_images:
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>")
     st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation for All Inputs", use_container_width=True):
         for idx, item in enumerate(all_images):
@@ -346,10 +345,7 @@ if model_loaded and all_images:
                         img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
                     display_prediction(img_pil, pred_mask)
-
-                    # Combined download links
                     get_combined_download_links(img_pil, pred_mask, idx)
-
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
