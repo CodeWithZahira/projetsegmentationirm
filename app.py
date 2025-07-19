@@ -8,6 +8,8 @@ import tempfile
 import os
 from io import BytesIO
 from fpdf import FPDF
+import io
+import zipfile
 
 # =============================
 # 📦 UTILITY FUNCTIONS
@@ -142,12 +144,25 @@ def get_combined_download_links(original, mask, idx):
     )
 
 # =============================
+# 🔧 SESSION STATE INITIALIZATION
+# =============================
+if 'model_file' not in st.session_state:
+    st.session_state['model_file'] = None
+if 'image_files' not in st.session_state:
+    st.session_state['image_files'] = []
+if 'video_file' not in st.session_state:
+    st.session_state['video_file'] = None
+if 'segmentation_results' not in st.session_state:
+    st.session_state['segmentation_results'] = []  # Will hold tuples (image, mask)
+
+# =============================
 # 🔧 PAGE CONFIG
 # =============================
 st.set_page_config(page_title="NeuroSeg Interactive", layout="wide")
 
 # =============================
 # 🎨 STYLING & BACKGROUND + TITLE ANIMATION
+# (No changes here, same as before)
 # =============================
 image_url = "https://4kwallpapers.com/images/wallpapers/3d-background-glass-light-abstract-background-blue-3840x2160-8728.jpg"
 st.markdown(f"""
@@ -290,13 +305,16 @@ with col1:
 
     st.markdown("---")
     st.markdown("Then, upload the downloaded file here:")
-    model_file = st.file_uploader("Upload model", type=["tflite"], label_visibility="collapsed")
+    model_file = st.file_uploader(
+        "Upload model", type=["tflite"], label_visibility="collapsed", key="model_file"
+    )
 
+    # Load model if uploaded
     interpreter = None
     model_loaded = False
-    if model_file:
+    if st.session_state['model_file']:
         try:
-            tflite_model = model_file.read()
+            tflite_model = st.session_state['model_file'].read()
             interpreter = tf.lite.Interpreter(model_content=tflite_model)
             interpreter.allocate_tensors()
             st.success("✅ Model loaded successfully.")
@@ -306,26 +324,50 @@ with col1:
 
 with col2:
     st.header("2. Upload MRI Image(s) or Video")
-    image_files = st.file_uploader("Upload MRI Images", type=["png", "jpg", "jpeg", "tif", "tiff"], accept_multiple_files=True, label_visibility="collapsed")
-    video_file = st.file_uploader("Or upload an MRI Video (mp4 or avi)", type=["mp4", "avi"], label_visibility="collapsed")
+    image_files = st.file_uploader(
+        "Upload MRI Images",
+        type=["png", "jpg", "jpeg", "tif", "tiff"],
+        accept_multiple_files=True,
+        label_visibility="collapsed",
+        key="image_files"
+    )
+    video_file = st.file_uploader(
+        "Or upload an MRI Video (mp4 or avi)",
+        type=["mp4", "avi"],
+        label_visibility="collapsed",
+        key="video_file"
+    )
 
-    all_images = []
-    if image_files:
-        for file in image_files:
-            st.image(file, caption=file.name, use_container_width=True)
-            all_images.append(file)
+# =============================
+# Button to Clear Inputs and Results
+# =============================
+def clear_all():
+    st.session_state['model_file'] = None
+    st.session_state['image_files'] = []
+    st.session_state['video_file'] = None
+    st.session_state['segmentation_results'] = []
 
-    if video_file:
-        with st.spinner("Extracting frames from video..."):
-            frames = extract_frames_from_video(video_file)
-            for i, frame in enumerate(frames):
-                st.image(frame, caption=f"Frame {i+1}", use_container_width=True)
-                all_images.append(frame)
+st.button("🧹 Clear All Inputs & Results", on_click=clear_all)
 
+# =============================
+# Gather all images from uploads and video frames
+# =============================
+all_images = []
+if st.session_state['image_files']:
+    for file in st.session_state['image_files']:
+        all_images.append(file)
+
+if st.session_state['video_file']:
+    with st.spinner("Extracting frames from video..."):
+        frames = extract_frames_from_video(st.session_state['video_file'])
+        all_images.extend(frames)
+
+# =============================
+# Perform segmentation and show results
+# =============================
 if model_loaded and all_images:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="animated-button-container">', unsafe_allow_html=True)
     if st.button("🔍 Perform Segmentation for All Inputs", use_container_width=True):
+        st.session_state['segmentation_results'] = []  # Clear old results
         for idx, item in enumerate(all_images):
             with st.spinner(f"Analyzing input {idx + 1}..."):
                 try:
@@ -334,14 +376,45 @@ if model_loaded and all_images:
                     else:
                         img_array, img_pil = preprocess_image(item)
                     pred_mask = tflite_predict(interpreter, img_array)
+                    st.write(f"### Result {idx+1}")
                     display_prediction(img_pil, pred_mask)
 
-                    # Combined download links
+                    # Store results for bulk download
+                    st.session_state['segmentation_results'].append((img_pil, pred_mask))
+
+                    # Individual download buttons
                     get_combined_download_links(img_pil, pred_mask, idx)
 
                 except Exception as e:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
-    st.markdown('</div>', unsafe_allow_html=True)
+
+# =============================
+# Download all segmentations as ZIP
+# =============================
+def generate_zip(images_masks):
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zf:
+        for i, (img_pil, mask_np) in enumerate(images_masks):
+            combined_img = superimpose_mask_on_image(img_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4)
+            img_byte_arr = io.BytesIO()
+            combined_img.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
+            zf.writestr(f"segmentation_{i+1}.png", img_byte_arr)
+    zip_buffer.seek(0)
+    return zip_buffer
+
+if st.session_state['segmentation_results']:
+    st.markdown("---")
+    st.header("📦 Download All Segmentations")
+
+    zip_data = generate_zip(st.session_state['segmentation_results'])
+
+    st.download_button(
+        label="📥 Download All Segmentation Images (ZIP)",
+        data=zip_data,
+        file_name="all_segmentations.zip",
+        mime="application/zip"
+    )
 
 # =============================
 # 🎓 FOOTER
