@@ -343,43 +343,33 @@ if model_loaded and all_images:
                     st.error(f"❌ Error with input {idx + 1}: {e}")
     st.markdown('</div>', unsafe_allow_html=True)
 
+# =============================
+# Download all results as ZIP
+# =============================
+def generate_zip(images_masks):
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zf:
+        for i, (img_pil, mask_np) in enumerate(images_masks):
+            combined_img = superimpose_mask_on_image(img_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4)
+            img_byte_arr = io.BytesIO()
+            combined_img.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
+            zf.writestr(f"segmentation_{i+1}.png", img_byte_arr)
+    zip_buffer.seek(0)
+    return zip_buffer
 
+if st.session_state['segmentation_results']:
+    st.markdown("---")
+    st.header("📦 Download All Segmentations")
 
+    zip_data = generate_zip(st.session_state['segmentation_results'])
 
-
-
-import zipfile
-
-# Create and cache the ZIP file to avoid regeneration on every rerun
-@st.cache_data
-def generate_zip_of_segmented_images(interpreter, all_images):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        zip_path = os.path.join(tmpdir, "segmented_outputs.zip")
-        with zipfile.ZipFile(zip_path, 'w') as zipf:
-            for idx, item in enumerate(all_images):
-                img_array, img_pil = preprocess_image(item)
-                pred_mask = tflite_predict(interpreter, img_array)
-                combined = combine_images(img_pil, pred_mask)
-                
-                # Save each combined image as a PNG
-                img_filename = f"segmented_{idx+1}.png"
-                img_path = os.path.join(tmpdir, img_filename)
-                combined.save(img_path)
-                zipf.write(img_path, arcname=img_filename)
-
-        with open(zip_path, 'rb') as f:
-            return f.read()
-
-if model_loaded and all_images:
-    zip_bytes = generate_zip_of_segmented_images(interpreter, all_images)
     st.download_button(
-        label="🗜️ Download All Segmentations (ZIP)",
-        data=zip_bytes,
+        label="📥 Download All Segmentation Images (ZIP)",
+        data=zip_data,
         file_name="all_segmentations.zip",
         mime="application/zip"
     )
-
-
 # =============================
 # 🎓 FOOTER
 # =============================
