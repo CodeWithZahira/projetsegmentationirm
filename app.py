@@ -34,6 +34,25 @@ def tflite_predict(interpreter, input_data):
     prediction = (prediction > 0.5).astype(np.uint8) * 255
     return prediction
 
+def superimpose_mask_on_image(original_pil, mask_np, mask_color=(255, 0, 0), alpha=0.4):
+    """Superimpose a colored mask on a grayscale image."""
+    # Resize mask to match original image
+    mask_pil = Image.fromarray(mask_np).resize(original_pil.size)
+    
+    # Convert original grayscale image to RGB
+    original_rgb = original_pil.convert("RGB")
+    
+    # Create a colored mask image (red by default)
+    color_mask = Image.new("RGB", original_pil.size, mask_color)
+    
+    # Create mask transparency mask with alpha
+    mask_rgba = mask_pil.convert("L").point(lambda p: int(p * alpha))
+    
+    # Composite the color mask on original image using mask transparency
+    composite = Image.composite(color_mask, original_rgb, mask_rgba)
+    
+    return composite
+
 def display_prediction(image_pil, mask):
     st.markdown("---")
     st.subheader("Segmentation Result")
@@ -41,7 +60,8 @@ def display_prediction(image_pil, mask):
     with col1:
         st.image(image_pil, caption="Original MRI Scan", use_container_width=True)
     with col2:
-        st.image(mask, caption="Predicted Segmentation Mask", use_container_width=True)
+        superimposed = superimpose_mask_on_image(image_pil, mask, mask_color=(255, 0, 0), alpha=0.4)
+        st.image(superimposed, caption="Superimposed Segmentation Mask", use_container_width=True)
 
 def extract_frames_from_video(video_file, max_frames=30):
     frames = []
