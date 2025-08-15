@@ -44,16 +44,31 @@ This combination of public and clinical data improves model performance and ensu
 ---
 
 ## 📊 Results
-**Model Performance Metrics:**
 
 | Metric       | Score |
 |--------------|-------|
 | Dice Score   | 0.8443  |
 | Loss          | 0.557  |
-
-**Example Segmentation (Original MRI, Ground Truth Mask, Predicted Mask):**
+**Example outputs:**
 
  ![](Results.jpg) 
+ 
 
+## 🔮 Future Work
 
+Explore advanced models: Test newer and more powerful segmentation architectures (e.g., attention U-Nets, Transformers) to improve accuracy.
+
+3D MRI analysis: Extend the model to work with 3D volumes, enabling volumetric tumor segmentation for better clinical insights.
+
+Clinical validation: Evaluate the model on larger and more diverse patient cohorts.
+
+Integration: Explore integration with hospital systems for real-time clinical use.
+
+## 📖 References
+
+Iqbal, S., et al. (2024). Deep Learning for Brain Tumor Segmentation: Advances and Challenges. ScienceDirect. Link
+
+Havaei, M., et al. (2019). Brain Tumor Segmentation with Deep Neural Networks. IEEE Xplore. Link
+
+Pereira, S., et al. (2018). Brain Tumor Segmentation using Convolutional Neural Networks in MRI Images. IEEE Xplore. Link
 
