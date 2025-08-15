@@ -12,8 +12,6 @@ Accurate segmentation of brain tumors from MRI scans is essential for diagnosis,
 This project implements a U-Net convolutional neural network, trained on public MRI datasets (e.g., BRATS) and fine-tuned using clinical MRI data from the Oncology and Hematology Center of the Mohammed VI University Hospital in Marrakech.
 
 An interactive Streamlit application called NeuroSeg is provided, enabling real-time testing and visualization of the model’s segmentation results.
-A deep learning project for **automatic brain tumor segmentation** from MRI scans using the **U-Net** architecture.  
-Developed as part of my **Final Year Project (PFE)** in Biomedical Engineering, this work integrates **medical imaging**, **AI**, and **healthcare innovation**.
 
 ---
 
