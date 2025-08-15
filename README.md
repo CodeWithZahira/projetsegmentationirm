@@ -37,14 +37,9 @@ This combination of public and clinical data improves model performance and ensu
 
 ---
 
-## 📌 Highlights
+## 📌 Architecture
 
-- **Architecture**: U-Net optimized for medical image segmentation.
-- **Performance**: High Dice similarity score for precise tumor boundary detection.
-- **Preprocessing**: Image normalization, resizing, and augmentation.
-- **Fine-tuning**: Model trained and refined for better generalization.
-- **Deployment**: Streamlit-based web app for quick demos.
-- **External Model Storage**: Pre-trained weights hosted on Google Drive.
+
 
 ---
 
