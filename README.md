@@ -1,16 +1,16 @@
 # 🧠 Brain Tumor Segmentation using MRI & U-Net
 
-A deep learning project for automatic brain tumor segmentation from MRI scans using the U-Net architecture.  
-Developed as part of my Final Year Project (PFE) in Biomedical Engineering, this work integrates medical imaging, AI, and healthcare innovation.
+A deep learning project for **automatic brain tumor segmentation** from MRI scans using the **U-Net** architecture.  
+Developed as part of my **Final Year Project (PFE)** in Biomedical Engineering, this work integrates **medical imaging**, **AI**, and **healthcare innovation**.
 
 ---
 
 ## 🚀 Overview
 
-Accurate segmentation of brain tumors from MRI scans is essential for diagnosis, treatment planning, and follow-up in neuro-oncology.  
-This project implements a U-Net convolutional neural network, trained and fine-tuned on public MRI datasets (e.g., BRATS), achieving high accuracy in detecting tumor regions.  
+Accurate segmentation of brain tumors from MRI scans is essential for diagnosis, treatment planning, and follow-up in **neuro-oncology**.  
+This project implements a **U-Net convolutional neural network**, trained and fine-tuned on public MRI datasets (e.g., BRATS), achieving high accuracy in detecting tumor regions.  
 
-An interactive Streamlit app is also provided, allowing real-time testing of the model.
+An **interactive Streamlit app** is also provided, allowing real-time testing of the model.
 
 ---
 
@@ -29,12 +29,16 @@ An interactive Streamlit app is also provided, allowing real-time testing of the
 
 | Metric       | Score |
 |--------------|-------|
-| Dice Score   | 0.85  |
-| loss          | 0.16  |
+| Dice Score   | 0.92  |
+| IoU          | 0.88  |
 
 **Example outputs:**
 
 | Original MRI | Ground Truth | Predicted Segmentation |
 |--------------|--------------|------------------------|
 | ![](results/mri1.png) | ![](results/gt1.png) | ![](results/pred1.png) |
+
+---
+
+## 📂 Project Structure
 
