@@ -1,4 +1,4 @@
-# 🧠 Brain Tumor Segmentation using MRI & U-Net
+# 🧠 Deep Learning-Based Automated Brain Tumor Segmentation from MRI Images Using a U-Net Convolutional Neural Network
 
 A deep learning project for **automatic brain tumor segmentation** from MRI scans using the **U-Net** architecture.  
 Developed as part of my **Final Year Project (PFE)** in Biomedical Engineering, this work integrates **medical imaging**, **AI**, and **healthcare innovation**.
