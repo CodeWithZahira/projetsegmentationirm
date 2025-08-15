@@ -29,8 +29,8 @@ An **interactive Streamlit app** is also provided, allowing real-time testing of
 
 | Metric       | Score |
 |--------------|-------|
-| Dice Score   | 0.92  |
-| IoU          | 0.88  |
+| Dice Score   | 0.8443  |
+| loss          | 0.1557  |
 
 **Example outputs:**
 
@@ -38,7 +38,5 @@ An **interactive Streamlit app** is also provided, allowing real-time testing of
 |--------------|--------------|------------------------|
 | ![](results/mri1.png) | ![](results/gt1.png) | ![](results/pred1.png) |
 
----
 
-## 📂 Project Structure
 
