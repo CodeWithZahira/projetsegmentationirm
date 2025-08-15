@@ -37,9 +37,9 @@ This combination of public and clinical data improves model performance and ensu
 
 ---
 
-## 📌 Architecture
+## 📌 Unet_Architecture
 
-
+ ![](Unet_Architecture.jpg) 
 
 ---
 
