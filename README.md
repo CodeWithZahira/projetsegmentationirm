@@ -27,12 +27,12 @@ An **interactive Streamlit app** is also provided, allowing real-time testing of
 
 ## 📊 Results
 
-<h3 align="center">📊 Model Performance</h3>
+<h3 >📊 Model Performance</h3>
 
 <p align="center">
   <table>
     <tr>
-      <th style="text-align:center; font-size:18px;">Metric</th>
+      <th style="text-align:center; font-size:30px;">Metric</th>
       <th style="text-align:center; font-size:18px;">Score</th>
     </tr>
     <tr>
