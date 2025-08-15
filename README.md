@@ -56,13 +56,10 @@ This combination of public and clinical data improves model performance and ensu
 
 ## 🔮 Future Work
 
-1. Explore advanced models: Test newer and more powerful segmentation architectures (e.g., attention U-Nets, Transformers) to improve accuracy.
-
-2. 3D MRI analysis: Extend the model to work with 3D volumes, enabling volumetric tumor segmentation for better clinical insights.
-
-3. Clinical validation: Evaluate the model on larger and more diverse patient cohorts.
-
-4. Integration: Explore integration with hospital systems for real-time clinical use.
+- **Explore advanced models:** Test newer and more powerful segmentation architectures (e.g., attention U-Nets, Transformers) to improve accuracy.  
+- **3D MRI analysis:** Extend the model to work with 3D volumes, enabling volumetric tumor segmentation for better clinical insights.  
+- **Clinical validation:** Evaluate the model on larger and more diverse patient cohorts.  
+- **Integration:** Explore integration with hospital systems for real-time clinical use.
 
 ## 📖 References
 
