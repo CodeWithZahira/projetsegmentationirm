@@ -56,19 +56,23 @@ This combination of public and clinical data improves model performance and ensu
 
 ## 🔮 Future Work
 
-Explore advanced models: Test newer and more powerful segmentation architectures (e.g., attention U-Nets, Transformers) to improve accuracy.
+1. Explore advanced models: Test newer and more powerful segmentation architectures (e.g., attention U-Nets, Transformers) to improve accuracy.
 
-3D MRI analysis: Extend the model to work with 3D volumes, enabling volumetric tumor segmentation for better clinical insights.
+2. 3D MRI analysis: Extend the model to work with 3D volumes, enabling volumetric tumor segmentation for better clinical insights.
 
-Clinical validation: Evaluate the model on larger and more diverse patient cohorts.
+3. Clinical validation: Evaluate the model on larger and more diverse patient cohorts.
 
-Integration: Explore integration with hospital systems for real-time clinical use.
+4. Integration: Explore integration with hospital systems for real-time clinical use.
 
 ## 📖 References
 
-Deep Learning for Brain Tumor Segmentation: Advances and Challenges (ScienceDirect, 2024)
+1. Deep Learning for Brain Tumor Segmentation: Advances and Challenges (ScienceDirect, 2024)  
+URL: https://www.sciencedirect.com/science/article/pii/S2405959524001115
 
-Brain Tumor Segmentation with Deep Neural Networks (IEEE Xplore, 2019)
+2. Brain Tumor Segmentation with Deep Neural Networks (IEEE Xplore, 2019)  
+URL: https://ieeexplore.ieee.org/document/8964956
 
-Brain Tumor Segmentation using Convolutional Neural Networks in MRI Images (IEEE Xplore, 2018)
+3. Brain Tumor Segmentation using Convolutional Neural Networks in MRI Images (IEEE Xplore, 2018)  
+URL: https://ieeexplore.ieee.org/document/8987265
+
 
