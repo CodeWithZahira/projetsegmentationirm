@@ -24,6 +24,7 @@ The dataset was sourced from The Cancer Imaging Archive (TCIA) and is publicly a
 In addition, the model was fine-tuned on clinical MRI data from the Oncology and Hematology Center of the Mohammed VI University Hospital in Marrakech.
 
 ⚠️ The hospital data is private and cannot be shared publicly.
+
 Number of images: 196 MRI scans
 
 Number of masks: 196 corresponding segmentation masks
