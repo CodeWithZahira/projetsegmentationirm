@@ -48,7 +48,7 @@ This combination of public and clinical data improves model performance and ensu
 | Metric       | Score |
 |--------------|-------|
 | Dice Score   | 0.8443  |
-| Loss          | 0.557  |
+| Loss          | 0.1557  |
 **Example outputs:**
 
  ![](Results.jpg) 
