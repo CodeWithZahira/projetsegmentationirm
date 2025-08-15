@@ -36,7 +36,7 @@ An **interactive Streamlit app** is also provided, allowing real-time testing of
 
 | Original MRI | Ground Truth | Predicted Segmentation |
 |--------------|--------------|------------------------|
-| ![](results/mri1.png) | ![](results/gt1.png) | ![](results/pred1.png) |
+| ![](Results.png) |
 
 
 
