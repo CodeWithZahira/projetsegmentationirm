@@ -26,11 +26,11 @@ An **interactive Streamlit app** is also provided, allowing real-time testing of
 ---
 
 ## 📊 Results
-|                        Metric                                                             |                                                   Score    |
-|-------------------------------------------------------------------------------------------|------------------------------------------------------------|
-|                        Dice Score                                                         |                                                   0.92     |
-|                          IoU                                                              |                                                   0.88     |
 
+| Metric       | Score |
+|--------------|-------|
+| Dice Score   | 0.8443  |
+| Loss          | 0.557  |
 **Example outputs:**
 
  ![](Results.jpg) 
