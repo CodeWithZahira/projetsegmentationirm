@@ -26,25 +26,10 @@ An **interactive Streamlit app** is also provided, allowing real-time testing of
 ---
 
 ## 📊 Results
-
-<h3 >📊 Model Performance</h3>
-
-<p align="center">
-  <table>
-    <tr>
-      <th style="text-align:center; font-size:30px;">Metric</th>
-      <th style="text-align:center; font-size:18px;">Score</th>
-    </tr>
-    <tr>
-      <td style="text-align:center; font-size:16px;">Dice Score</td>
-      <td style="text-align:center; font-size:16px;">0.8443</td>
-    </tr>
-    <tr>
-      <td style="text-align:center; font-size:16px;">loss</td>
-      <td style="text-align:center; font-size:16px;">0.1557</td>
-    </tr>
-  </table>
-</p>
+|                        Metric                                                             |                                                   Score    |
+|-------------------------------------------------------------------------------------------|------------------------------------------------------------|
+|                        Dice Score                                                         |                                                   0.92     |
+|                          IoU                                                              |                                                   0.88     |
 
 **Example outputs:**
 
