@@ -66,9 +66,9 @@ Integration: Explore integration with hospital systems for real-time clinical us
 
 ## 📖 References
 
-Iqbal, S., et al. (2024). Deep Learning for Brain Tumor Segmentation: Advances and Challenges. ScienceDirect. Link
+Deep Learning for Brain Tumor Segmentation: Advances and Challenges (ScienceDirect, 2024)
 
-Havaei, M., et al. (2019). Brain Tumor Segmentation with Deep Neural Networks. IEEE Xplore. Link
+Brain Tumor Segmentation with Deep Neural Networks (IEEE Xplore, 2019)
 
-Pereira, S., et al. (2018). Brain Tumor Segmentation using Convolutional Neural Networks in MRI Images. IEEE Xplore. Link
+Brain Tumor Segmentation using Convolutional Neural Networks in MRI Images (IEEE Xplore, 2018)
 
