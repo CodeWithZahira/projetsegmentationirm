@@ -44,12 +44,14 @@ This combination of public and clinical data improves model performance and ensu
 ---
 
 ## 📊 Results
+**Model Performance Metrics:**
 
 | Metric       | Score |
 |--------------|-------|
 | Dice Score   | 0.8443  |
 | Loss          | 0.557  |
-**Example outputs:**
+
+**Example Segmentation (Original MRI, Ground Truth Mask, Predicted Mask):**
 
  ![](Results.jpg) 
 
